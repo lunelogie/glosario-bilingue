@@ -1,11 +1,242 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Datos quemados directamente en el componente
+import glossaryRaw from '../data/glossary.json';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Glosario Estadístico Trilingüe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/global.css" />
+</head>
+<body>
+  <div class="app-shell">
+
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        {/* <div class="logo-mark">&Sigma;</div> */}
+        <div class="logo-text">
+          <span class="logo-title">Glosario</span>
+          <span class="logo-sub">Estadístico Trilingüe</span>
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="search-input" class="search-input"
+          placeholder="Buscar en inglés, español o francés…"
+          autocomplete="off" spellcheck="false" />
+      </div>
+
+      <div class="filter-row">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="Descriptive Statistics">Descriptiva</button>
+        <button class="filter-btn" data-filter="Inferential Statistics">Inferencial</button>
+      </div>
+
+      <div class="term-count" id="term-count">Mostrando 31 de 31 entradas</div>
+
+      <nav class="term-list" id="term-list">
+        {glossaryRaw.map((term, i) => (
+          <button
+            class="term-item"
+            data-index={String(i)}
+            data-en={term.term_en.toLowerCase()}
+            data-es={term.term_es.toLowerCase()}
+            data-fr={term.term_fr.toLowerCase()}
+            data-campo={term.campo}
+          >
+            <span class="term-num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="term-label">{term.term_en}</span>
+			<span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+			<span class="term-label term-label-es">{term.term_es}</span>
+			<span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+			<span class="term-label term-label-fr">{term.term_fr}</span>
+            <span class={`term-badge ${term.campo === 'Descriptive Statistics' ? 'badge-desc' : 'badge-inf'}`}>
+              {term.campo === 'Descriptive Statistics' ? 'DESC' : 'INF'}
+            </span>
+          </button>
+        ))}
+      </nav>
+    </aside>
+
+    <main class="main-panel" id="main-panel">
+      <div class="welcome-state" id="welcome-state">
+        <div class="welcome-symbol">&Sigma;</div>
+        <h2 class="welcome-title">Selecciona un término</h2>
+        <p class="welcome-sub">Elige una entrada del glosario para ver su ficha terminológica completa en los tres idiomas.</p>
+      </div>
+
+      <div class="entry-view" id="entry-view" style="display:none">
+        <div class="entry-header">
+          <div class="entry-meta-top">
+            <span class="entry-number" id="entry-number">01</span>
+            <div class="entry-titles">
+              <span class="entry-title-en" id="entry-title-en"></span>
+              <span class="entry-sep">&middot;</span>
+              <span class="entry-title-es" id="entry-title-es"></span>
+              <span class="entry-sep">&middot;</span>
+              <span class="entry-title-fr" id="entry-title-fr"></span>
+            </div>
+          </div>
+          <div class="entry-meta-tags">
+            <span class="tag-symbol" id="entry-symbol"></span>
+            <span class="tag-campo" id="entry-campo"></span>
+          </div>
+        </div>
+
+        <div class="cards-grid">
+          <div class="lang-card card-en">
+            <div class="card-lang-header">
+              <img class="flag" src="/public/reino-unido.png" alt="English" />
+              <span class="lang-label">ENGLISH</span>
+            </div>
+            <h3 class="card-term" id="card-term-en"></h3>
+            <p class="card-gram" id="card-gram-en"></p>
+            <p class="card-phonetic" id="card-phonetic-en"></p>
+            <div class="card-section-label">DEFINITION</div>
+            <p class="card-def" id="card-def-en"></p>
+            <a class="card-source" id="card-source-en" href="#" target="_blank" rel="noopener"></a>
+          </div>
+
+          <div class="lang-card card-es">
+            <div class="card-lang-header">
+              <img class="flag" src="/public/mundo.png" alt="Español" />
+              <span class="lang-label">ESPAÑOL</span>
+            </div>
+            <h3 class="card-term" id="card-term-es"></h3>
+            <p class="card-gram" id="card-gram-es"></p>
+            <p class="card-phonetic" id="card-phonetic-es"></p>
+            <div class="card-section-label">DEFINICIÓN</div>
+            <p class="card-def" id="card-def-es"></p>
+            <a class="card-source" id="card-source-es" href="#" target="_blank" rel="noopener"></a>
+          </div>
+
+          <div class="lang-card card-fr">
+            <div class="card-lang-header">
+              <img class="flag" src="/public/francia.png" alt="Français" />
+              <span class="lang-label">FRANÇAIS</span>
+            </div>
+            <h3 class="card-term" id="card-term-fr"></h3>
+            <p class="card-gram" id="card-gram-fr"></p>
+            <p class="card-phonetic" id="card-phonetic-fr"></p>
+            <div class="card-section-label">DÉFINITION</div>
+            <p class="card-def" id="card-def-fr"></p>
+            <a class="card-source" id="card-source-fr" href="#" target="_blank" rel="noopener"></a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const glossary = [{"term_en": "Correlation", "term_es": "Correlación", "term_fr": "Corrélation", "campo": "Inferential Statistics", "simbolo": "r / ρ", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical measure of the strength and direction of the linear relationship between two variables, ranging from −1 to +1.", "def_es": "Medida estadística de la fuerza y la dirección de la relación lineal entre dos variables, con valores entre −1 y +1.", "def_fr": "Mesure statistique de la force et de la direction de la relation linéaire entre deux variables, dont les valeurs vont de −1 à +1.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-3-the-regression-equation", "fuente_def_es": "https://dle.rae.es/correlaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˌkɒr.əˈleɪ.ʃən/", "fon_es": "[ko.re.laˈsjon]", "fon_fr": "[kɔ.ʁe.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Correlation coefficient", "term_es": "Coeficiente de correlación", "term_fr": "Coefficient de corrélation", "campo": "Inferential Statistics", "simbolo": "r / ρ", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A numerical measure that quantifies the strength and direction of the linear relationship between two variables, typically ranging from -1 to +1.", "def_es": "Medida numérica que cuantifica la fuerza y dirección de la relación lineal entre dos variables, generalmente con valores entre -1 y +1.", "def_fr": "Mesure numérique qui quantifie la force et la direction de la relation linéaire entre deux variables, généralement comprise entre -1 et +1.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095637394", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=coeficiente+de+correlaci%C3%B3n&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˌkɒr.əˈleɪ.ʃən ˌkoʊ.ɪˈfɪʃ.ənt/", "fon_es": "[koe.fi.ˈsjen.te ðe ko.re.laˈsjon]", "fon_fr": "[kɔ.e.fi.sjɑ̃ də kɔ.ʁe.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Covariance", "term_es": "Covarianza", "term_fr": "Covariance", "campo": "Inferential Statistics", "simbolo": "Cov(X,Y) / sxy", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A measure of the joint variability of two random variables, indicating how much they change together; positive values indicate a direct relationship, negative values an inverse one.", "def_es": "Medida de la variabilidad conjunta de dos variables aleatorias, que indica en qué medida cambian juntas; valores positivos indican una relación directa y valores negativos una relación inversa.", "def_fr": "Mesure de la variabilité conjointe de deux variables aléatoires, indiquant dans quelle mesure elles varient ensemble; les valeurs positives indiquent une relation directe, les valeurs négatives une relation inverse.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095640834", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=covarianza&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/covariance", "fon_en": "/koʊˈveər.i.əns/", "fon_es": "[ko.βaˈɾjan.sa]", "fon_fr": "[ko.va.ʁjɑ̃s]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/covariance", "fuente_fon_es": "https://es.wiktionary.org/wiki/covarianza", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/covariance", "comentario": ""}, {"term_en": "Degrees of freedom", "term_es": "Grados de libertad", "term_fr": "Degrés de liberté", "campo": "Inferential Statistics", "simbolo": "df / gl", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina plural (loc.n.m.pl.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "The number of independent values that can vary in a statistical calculation; typically equal to the sample size minus the number of estimated parameters.", "def_es": "Número de valores independientes que pueden variar en un cálculo estadístico; generalmente igual al tamaño de la muestra menos el número de parámetros estimados.", "def_fr": "Nombre de valeurs indépendantes pouvant varier dans un calcul statistique; généralement égal à la taille de l'échantillon moins le nombre de paramètres estimés.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095734874", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=grados+de+libertad&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/libert%C3%A9", "fon_en": "/dɪˈɡriːz əv ˈfriː.dəm/", "fon_es": "[ˈɡɾa.ðos ðe li.βeɾˈtað]", "fon_fr": "[de.ɡʁe də li.bɛʁ.te]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/degree", "fuente_fon_es": "https://es.wiktionary.org/wiki/grado", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/degr%C3%A9", "comentario": ""}, {"term_en": "Deviation", "term_es": "Desviación", "term_fr": "Déviation", "campo": "Descriptive Statistics", "simbolo": "d", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The difference between an individual data value and a reference value, typically the mean, indicating how far that value departs from the center of the distribution.", "def_es": "Diferencia entre un valor individual y un valor de referencia, habitualmente la media, que indica cuánto se aleja ese valor del centro de la distribución.", "def_fr": "Différence entre une valeur individuelle et une valeur de référence, généralement la moyenne, indiquant l'éloignement de cette valeur par rapport au centre de la distribution.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm", "fuente_def_es": "https://dle.rae.es/desviaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/d%C3%A9viation", "fon_en": "/ˌdiː.viˈeɪ.ʃən/", "fon_es": "[des.βjaˈsjon]", "fon_fr": "[de.vja.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/deviation", "fuente_fon_es": "https://es.wiktionary.org/wiki/desviaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/d%C3%A9viation", "comentario": ""}, {"term_en": "Error", "term_es": "Error", "term_fr": "Erreur", "campo": "Inferential Statistics", "simbolo": "e / ε", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The difference between an observed value and a true or expected value; in statistics, it refers to variability that cannot be explained by the model.", "def_es": "Diferencia entre un valor observado y un valor verdadero o esperado; en estadística, se refiere a la variabilidad que no puede ser explicada por el modelo.", "def_fr": "Différence entre une valeur observée et une valeur vraie ou attendue; en statistique, il désigne la variabilité qui ne peut pas être expliquée par le modèle.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095825038", "fuente_def_es": "https://dle.rae.es/error", "fuente_def_fr": "https://www.cnrtl.fr/definition/erreur", "fon_en": "/ˈer.ər/", "fon_es": "[eˈroɾ]", "fon_fr": "[e.ʁœʁ]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/error", "fuente_fon_es": "https://es.wiktionary.org/wiki/error", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/erreur", "comentario": ""}, {"term_en": "F-statistic", "term_es": "Estadístico F", "term_fr": "Statistique F", "campo": "Inferential Statistics", "simbolo": "F", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A ratio of two variances used in ANOVA and regression analysis to test whether group means differ significantly or whether a model explains a significant amount of variance.", "def_es": "Cociente de dos varianzas utilizado en ANOVA y análisis de regresión para determinar si las medias de los grupos difieren significativamente o si un modelo explica una cantidad significativa de varianza.", "def_fr": "Rapport de deux variances utilisé dans l'ANOVA et l'analyse de régression pour tester si les moyennes des groupes diffèrent significativement ou si un modèle explique une part significative de la variance.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095853165", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=estad%C3%ADstico+F&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/statistique", "fon_en": "/ɛf stəˈtɪs.tɪk/", "fon_es": "[es.ta.ˈðis.ti.ko ˈe.fe]", "fon_fr": "[sta.tis.tik ɛf]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/statistic", "fuente_fon_es": "https://es.wiktionary.org/wiki/estad%C3%ADstico", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/statistique", "comentario": ""}, {"term_en": "Hypothesis", "term_es": "Hipótesis", "term_fr": "Hypothèse", "campo": "Inferential Statistics", "simbolo": "H₀ / H₁", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A testable statement or proposition about a population parameter, serving as the basis for statistical testing; includes the null hypothesis (H₀) and the alternative hypothesis (H₁).", "def_es": "Proposición o afirmación verificable sobre un parámetro poblacional, que sirve de base para la contrastación estadística; incluye la hipótesis nula (H₀) y la hipótesis alternativa (H₁).", "def_fr": "Proposition ou affirmation vérifiable sur un paramètre de population, servant de base aux tests statistiques; comprend l'hypothèse nulle (H₀) et l'hypothèse alternative (H₁).", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095959660", "fuente_def_es": "https://dle.rae.es/hip%C3%B3tesis", "fuente_def_fr": "https://www.cnrtl.fr/definition/hypoth%C3%A8se", "fon_en": "/haɪˈpɒθ.ɪ.sɪs/", "fon_es": "[i.ˈpo.te.sis]", "fon_fr": "[i.pɔ.tɛz]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/hypothesis", "fuente_fon_es": "https://es.wiktionary.org/wiki/hip%C3%B3tesis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/hypoth%C3%A8se", "comentario": ""}, {"term_en": "Hypothesis test", "term_es": "Prueba de hipótesis", "term_fr": "Test d'hypothèse", "campo": "Inferential Statistics", "simbolo": "H₀ / H₁", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A formal statistical procedure used to evaluate the evidence against a null hypothesis, leading to a decision to reject or fail to reject it based on sample data.", "def_es": "Procedimiento estadístico formal utilizado para evaluar la evidencia en contra de una hipótesis nula, que lleva a una decisión de rechazarla o no rechazarla en función de los datos muestrales.", "def_fr": "Procédure statistique formelle permettant d'évaluer les preuves contre une hypothèse nulle, conduisant à la décision de la rejeter ou non sur la base des données d'un échantillon.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095959660", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=prueba+de+hip%C3%B3tesis&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/hypoth%C3%A8se", "fon_en": "/haɪˈpɒθ.ɪ.sɪs test/", "fon_es": "[ˈpɾwe.βa ðe i.ˈpo.te.sis]", "fon_fr": "[tɛst d‿i.pɔ.tɛz]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/hypothesis", "fuente_fon_es": "https://es.wiktionary.org/wiki/hip%C3%B3tesis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/hypoth%C3%A8se", "comentario": ""}, {"term_en": "Kurtosis", "term_es": "Curtosis", "term_fr": "Aplatissement / Kurtosis", "campo": "Descriptive Statistics", "simbolo": "γ₂ / β₂", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "A measure of the shape of a distribution's tails relative to a normal distribution; high kurtosis (leptokurtic) indicates heavier tails, low kurtosis (platykurtic) indicates lighter tails.", "def_es": "Medida de la forma de las colas de una distribución en relación con la distribución normal; una curtosis alta (leptocúrtica) indica colas más pesadas, y una baja (platicúrtica) indica colas más ligeras.", "def_fr": "Mesure de la forme des queues d'une distribution par rapport à la distribution normale; une kurtosis élevée (leptokurtique) indique des queues plus lourdes, une kurtosis faible (platykurtique) des queues plus légères.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=curtosis&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/aplatissement", "fon_en": "/kɜːˈtoʊ.sɪs/", "fon_es": "[kuɾˈto.sis]", "fon_fr": "[kyʁ.to.zis]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/kurtosis", "fuente_fon_es": "https://es.wiktionary.org/wiki/curtosis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/kurtosis", "comentario": ""}, {"term_en": "Maximum", "term_es": "Máximo", "term_fr": "Maximum", "campo": "Descriptive Statistics", "simbolo": "max", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The largest value in a dataset or within a defined range.", "def_es": "El valor más grande de un conjunto de datos o dentro de un rango definido.", "def_fr": "La plus grande valeur d'un ensemble de données ou dans une plage définie.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100143614", "fuente_def_es": "https://dle.rae.es/m%C3%A1ximo", "fuente_def_fr": "https://www.cnrtl.fr/definition/maximum", "fon_en": "/ˈmæk.sɪ.məm/", "fon_es": "[ˈmak.si.mo]", "fon_fr": "[mak.si.mɔm]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/maximum", "fuente_fon_es": "https://es.wiktionary.org/wiki/m%C3%A1ximo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/maximum", "comentario": ""}, {"term_en": "Mean", "term_es": "Media / Promedio", "term_fr": "Moyenne", "campo": "Descriptive Statistics", "simbolo": "x̄ (muestra) / μ (población)", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The arithmetic average of a dataset, calculated by dividing the sum of all values by the number of observations.", "def_es": "Promedio aritmético de un conjunto de datos, calculado dividiendo la suma de todos los valores entre el número de observaciones.", "def_fr": "Moyenne arithmétique d'un ensemble de données, calculée en divisant la somme de toutes les valeurs par le nombre d'observations.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/media", "fuente_def_fr": "https://www.insee.fr/fr/metadonnees/definition/c1711", "fon_en": "/miːn/", "fon_es": "[ˈme.dja]", "fon_fr": "[mwa.jɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/mean", "fuente_fon_es": "https://es.wiktionary.org/wiki/media", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/moyenne", "comentario": ""}, {"term_en": "Median", "term_es": "Mediana", "term_fr": "Médiane", "campo": "Descriptive Statistics", "simbolo": "Md / Me", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The middle value of an ordered dataset that divides it into two equal halves; for an even number of values, it is the average of the two central values.", "def_es": "Valor central de un conjunto de datos ordenados que lo divide en dos mitades iguales; si el número de valores es par, es la media de los dos valores centrales.", "def_fr": "Valeur centrale d'un ensemble de données ordonné qui le divise en deux moitiés égales; si le nombre de valeurs est pair, il s'agit de la moyenne des deux valeurs centrales.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/mediana", "fuente_def_fr": "https://www.insee.fr/fr/metadonnees/definition/c1713", "fon_en": "/ˈmiː.di.ən/", "fon_es": "[meˈdja.na]", "fon_fr": "[me.djɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/median", "fuente_fon_es": "https://es.wiktionary.org/wiki/mediana", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/m%C3%A9diane", "comentario": ""}, {"term_en": "Minimum", "term_es": "Mínimo", "term_fr": "Minimum", "campo": "Descriptive Statistics", "simbolo": "min", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The smallest value in a dataset or within a defined range.", "def_es": "El valor más pequeño de un conjunto de datos o dentro de un rango definido.", "def_fr": "La plus petite valeur d'un ensemble de données ou dans une plage définie.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100200448", "fuente_def_es": "https://dle.rae.es/m%C3%ADnimo", "fuente_def_fr": "https://www.cnrtl.fr/definition/minimum", "fon_en": "/ˈmɪn.ɪ.məm/", "fon_es": "[ˈmi.ni.mo]", "fon_fr": "[mi.ni.mɔm]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/minimum", "fuente_fon_es": "https://es.wiktionary.org/wiki/m%C3%ADnimo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/minimum", "comentario": ""}, {"term_en": "Mode", "term_es": "Moda", "term_fr": "Mode", "campo": "Descriptive Statistics", "simbolo": "Mo", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The value that appears most frequently in a dataset; a dataset may be unimodal, bimodal, or multimodal.", "def_es": "Valor que aparece con mayor frecuencia en un conjunto de datos; una distribución puede ser unimodal, bimodal o multimodal.", "def_fr": "Valeur qui apparaît le plus fréquemment dans un ensemble de données; une distribution peut être unimodale, bimodale ou multimodale.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/moda", "fuente_def_fr": "https://gdt.oqlf.gouv.qc.ca/ficheOqlf.aspx?Id_Fiche=8360395", "fon_en": "/moʊd/", "fon_es": "[ˈmo.ða]", "fon_fr": "[mɔd]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/mode", "fuente_fon_es": "https://es.wiktionary.org/wiki/moda", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/mode", "comentario": ""}, {"term_en": "N (population size)", "term_es": "N (tamaño de la población)", "term_fr": "N (taille de la population)", "campo": "Descriptive Statistics", "simbolo": "N", "gram_en": "symbol / noun (symb.)", "gram_es": "símbolo / sustantivo (simb.)", "gram_fr": "symbole / nom (symb.)", "def_en": "The total number of individuals or observations that make up a population.", "def_es": "El número total de individuos u observaciones que conforman una población.", "def_fr": "Le nombre total d'individus ou d'observations qui constituent une population.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100352873", "fuente_def_es": "https://dle.rae.es/poblaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/population", "fon_en": "/ɛn/", "fon_es": "[ˈe.ne]", "fon_fr": "[ɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/population", "fuente_fon_es": "https://es.wiktionary.org/wiki/poblaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/population", "comentario": ""}, {"term_en": "n (sample size)", "term_es": "n (tamaño de la muestra)", "term_fr": "n (taille de l'échantillon)", "campo": "Inferential Statistics", "simbolo": "n", "gram_en": "symbol / noun (symb.)", "gram_es": "símbolo / sustantivo (simb.)", "gram_fr": "symbole / nom (symb.)", "def_en": "The number of observations or individuals included in a sample.", "def_es": "El número de observaciones o individuos incluidos en una muestra.", "def_fr": "Le nombre d'observations ou d'individus inclus dans un échantillon.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100433876", "fuente_def_es": "https://dle.rae.es/muestra", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9chantillon", "fon_en": "/ɛn/", "fon_es": "[ˈe.ne]", "fon_fr": "[ɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/sample", "fuente_fon_es": "https://es.wiktionary.org/wiki/muestra", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9chantillon", "comentario": ""}, {"term_en": "P-value", "term_es": "Valor P", "term_fr": "Valeur P / P-valeur", "campo": "Inferential Statistics", "simbolo": "p", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "The probability of obtaining results at least as extreme as those observed, assuming the null hypothesis is true.", "def_es": "Probabilidad de obtener resultados iguales o más extremos que los observados, bajo el supuesto de que la hipótesis nula es verdadera.", "def_fr": "Probabilité d'obtenir des résultats au moins aussi extrêmes que ceux observés, en supposant que l'hypothèse nulle est vraie.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm", "fuente_def_es": "https://www.fundeu.es/recomendacion/valor-p-no-p-value/", "fuente_def_fr": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/26557677/valeur-p", "fon_en": "/ˈpiː ˌvæl.juː/", "fon_es": "[ˈβa.loɾ ˈpe]", "fon_fr": "[pe va.lœʁ]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/p-value", "fuente_fon_es": "https://es.wiktionary.org/wiki/valor", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/valeur", "comentario": ""}, {"term_en": "Pearson's r", "term_es": "R de Pearson", "term_fr": "R de Pearson", "campo": "Inferential Statistics", "simbolo": "r", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A correlation coefficient that measures the strength and direction of the linear relationship between two quantitative variables.", "def_es": "Coeficiente de correlación que mide la fuerza y la dirección de la relación lineal entre dos variables cuantitativas.", "def_fr": "Coefficient de corrélation qui mesure la force et la direction de la relation linéaire entre deux variables quantitatives.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=coeficiente+de+Pearson&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˈpɪər.sənz ɑːr/", "fon_es": "[ˈe.re ðe ˈpeaɾ.son]", "fon_fr": "[ɛʁ də pɛʁ.sɔn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Population", "term_es": "Población", "term_fr": "Population", "campo": "Inferential Statistics", "simbolo": "N", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The entire set of individuals, items, or data points of interest in a statistical study.", "def_es": "Conjunto completo de individuos, elementos o datos de interés en un estudio estadístico.", "def_fr": "Ensemble complet des individus, éléments ou données d'intérêt dans une étude statistique.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/poblaci%C3%B3n", "fuente_def_fr": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/8377856/population", "fon_en": "/ˌpɒp.jʊˈleɪ.ʃən/", "fon_es": "[po.βlaˈsjon]", "fon_fr": "[pɔ.py.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/population", "fuente_fon_es": "https://es.wiktionary.org/wiki/poblaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/population", "comentario": ""}, {"term_en": "Power", "term_es": "Potencia de la prueba", "term_fr": "Puissance du test", "campo": "Inferential Statistics", "simbolo": "1 - β", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "The probability that a statistical test correctly rejects a false null hypothesis, indicating its ability to detect an effect.", "def_es": "Probabilidad de que una prueba estadística rechace correctamente una hipótesis nula falsa, lo que indica su capacidad para detectar un efecto.", "def_fr": "Probabilité qu'un test statistique rejette correctement une hypothèse nulle fausse, indiquant sa capacité à détecter un effet.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc222.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=potencia+estad%C3%ADstica&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/puissance", "fon_en": "/ˈpaʊ.ər/", "fon_es": "[po.ˈten.sja ðe la ˈpɾwe.βa]", "fon_fr": "[pɥi.sɑ̃s dy tɛst]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/power", "fuente_fon_es": "https://es.wiktionary.org/wiki/potencia", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/puissance", "comentario": ""}, {"term_en": "Range", "term_es": "Rango / Recorrido", "term_fr": "Étendue", "campo": "Descriptive Statistics", "simbolo": "R", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The difference between the largest and smallest values in a dataset, used as a basic measure of spread.", "def_es": "Diferencia entre el valor más grande y el más pequeño de un conjunto de datos, utilizada como medida básica de dispersión.", "def_fr": "Différence entre la valeur la plus grande et la valeur la plus petite d'un ensemble de données, utilisée comme mesure élémentaire de dispersion.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/rango", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9tendue", "fon_en": "/reɪndʒ/", "fon_es": "[ˈɾan.ɡo]", "fon_fr": "[e.tɑ̃d]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/range", "fuente_fon_es": "https://es.wiktionary.org/wiki/rango", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9tendue", "comentario": ""}, {"term_en": "Regression", "term_es": "Regresión", "term_fr": "Régression", "campo": "Inferential Statistics", "simbolo": "ŷ = a + bx", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical method used to model and analyze relationships between a dependent variable and one or more independent variables.", "def_es": "Método estadístico utilizado para modelar y analizar las relaciones entre una variable dependiente y una o más variables independientes.", "def_fr": "Méthode statistique utilisée pour modéliser et analyser les relations entre une variable dépendante et une ou plusieurs variables indépendantes.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-introduction", "fuente_def_es": "https://dle.rae.es/regresi%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/r%C3%A9gression", "fon_en": "/rɪˈɡreʃ.ən/", "fon_es": "[re.ɣɾeˈsjon]", "fon_fr": "[ʁe.ɡʁɛ.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/regression", "fuente_fon_es": "https://es.wiktionary.org/wiki/regresi%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/r%C3%A9gression", "comentario": ""}, {"term_en": "Residual term", "term_es": "Término residual en regresión", "term_fr": "Terme résiduel", "campo": "Inferential Statistics", "simbolo": "ε / e", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "The difference between an observed value and the value predicted by a regression model, representing unexplained variation.", "def_es": "Diferencia entre un valor observado y el valor predicho por un modelo de regresión, que representa la variación no explicada por dicho modelo.", "def_fr": "Différence entre une valeur observée et la valeur prédite par un modèle de régression, représentant la variation non expliquée par ce modèle.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-2-the-regression-equation", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=t%C3%A9rmino+residual&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/r%C3%A9siduel", "fon_en": "/rɪˈzɪd.ju.əl tɜːm/", "fon_es": "[ˈteɾ.mi.no re.si.ˈðwal]", "fon_fr": "[tɛʁm ʁe.zi.dɥɛl]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/residual", "fuente_fon_es": "https://es.wiktionary.org/wiki/residual", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/r%C3%A9siduel", "comentario": ""}, {"term_en": "Sample", "term_es": "Muestra", "term_fr": "Échantillon", "campo": "Inferential Statistics", "simbolo": "n", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "A subset of a population selected for analysis to make inferences about the population.", "def_es": "Subconjunto de una población seleccionado para su análisis con el fin de realizar inferencias sobre dicha población.", "def_fr": "Sous-ensemble d'une population sélectionné pour analyse afin de formuler des inférences sur cette population.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/muestra", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9chantillon", "fon_en": "/ˈsæm.pəl/", "fon_es": "[ˈmwes.tɾa]", "fon_fr": "[e.ʃɑ̃.ti.jɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/sample", "fuente_fon_es": "https://es.wiktionary.org/wiki/muestra", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9chantillon", "comentario": ""}, {"term_en": "Significant", "term_es": "Significativo / significativa", "term_fr": "Significatif / significative", "campo": "Inferential Statistics", "simbolo": "—", "gram_en": "adjective (adj.)", "gram_es": "adjetivo (adj.)", "gram_fr": "adjectif (adj.)", "def_en": "A result is considered statistically significant if it is unlikely to have occurred by chance under the null hypothesis.", "def_es": "Un resultado se considera estadísticamente significativo cuando es poco probable que haya ocurrido por azar bajo la hipótesis nula.", "def_fr": "Un résultat est considéré statistiquement significatif lorsqu'il est peu probable qu'il soit dû au hasard sous l'hypothèse nulle.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc2.htm", "fuente_def_es": "https://dle.rae.es/significativo", "fuente_def_fr": "https://www.cnrtl.fr/definition/significatif", "fon_en": "/sɪɡˈnɪf.ɪ.kənt/", "fon_es": "[siɣ.ni.fiˈka.ti.βo]", "fon_fr": "[si.ɲi.fi.ka.tif]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/significant", "fuente_fon_es": "https://es.wiktionary.org/wiki/significativo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/significatif", "comentario": ""}, {"term_en": "Skewness", "term_es": "Asimetría", "term_fr": "Asymétrie", "campo": "Descriptive Statistics", "simbolo": "γ₁ / g₁", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical measure that describes the degree and direction of asymmetry in a distribution.", "def_es": "Medida estadística que describe el grado y la dirección de la asimetría de una distribución.", "def_fr": "Mesure statistique décrivant le degré et la direction de l'asymétrie d'une distribution.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://dle.rae.es/asimetr%C3%ADa", "fuente_def_fr": "https://www.cnrtl.fr/definition/asym%C3%A9trie", "fon_en": "/ˈskjuː.nəs/", "fon_es": "[a.si.meˈtɾi.a]", "fon_fr": "[a.si.me.tʁi]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/skewness", "fuente_fon_es": "https://es.wiktionary.org/wiki/asimetr%C3%ADa", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/asym%C3%A9trie", "comentario": ""}, {"term_en": "Standard deviation", "term_es": "Desviación estándar", "term_fr": "Écart-type", "campo": "Descriptive Statistics", "simbolo": "σ (población) / s (muestra)", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale masculine composée (loc.n.m.)", "def_en": "A measure of variability that indicates the typical distance of data points from the mean, expressed in the same units as the data.", "def_es": "Medida de variabilidad que indica la distancia típica de los datos respecto a la media, expresada en las mismas unidades que los datos.", "def_fr": "Mesure de variabilité indiquant la distance typique des données par rapport à la moyenne, exprimée dans les mêmes unités que les données.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/desviaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9cart-type", "fon_en": "/ˈstæn.dəd ˌdiː.viˈeɪ.ʃən/", "fon_es": "[des.βjaˈsjon esˈtan.daɾ]", "fon_fr": "[e.kaʁ tip]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/standard%20deviation", "fuente_fon_es": "https://es.wiktionary.org/wiki/desviaci%C3%B3n_est%C3%A1ndar", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9cart-type", "comentario": ""}, {"term_en": "T-test", "term_es": "Prueba T", "term_fr": "Test T", "campo": "Inferential Statistics", "simbolo": "t", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "A statistical hypothesis test used to determine whether there is a significant difference between the means of two groups, especially with small sample sizes.", "def_es": "Prueba de hipótesis estadística que determina si existe una diferencia significativa entre las medias de dos grupos, especialmente cuando el tamaño muestral es pequeño.", "def_fr": "Test d'hypothèse statistique permettant de déterminer s'il existe une différence significative entre les moyennes de deux groupes, notamment lorsque la taille de l'échantillon est réduite.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=prueba+T&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/test", "fon_en": "/ˈtiː test/", "fon_es": "[ˈpɾwe.βa te]", "fon_fr": "[tɛst te]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/t-test", "fuente_fon_es": "https://es.wiktionary.org/wiki/prueba", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/test", "comentario": ""}, {"term_en": "Variable", "term_es": "Variable", "term_fr": "Variable", "campo": "Descriptive Statistics", "simbolo": "X, Y, xᵢ (depende del contexto)", "gram_en": "noun / adjective (n./adj.)", "gram_es": "sustantivo femenino / adjetivo (s.f./adj.)", "gram_fr": "nom féminin / adjectif (n.f./adj.)", "def_en": "A measurable characteristic or attribute that can take on different values across individuals or observations in a dataset.", "def_es": "Característica o atributo medible que puede tomar distintos valores en los individuos u observaciones de un conjunto de datos.", "def_fr": "Caractéristique ou attribut mesurable susceptible de prendre des valeurs différentes selon les individus ou les observations d'un ensemble de données.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/variable", "fuente_def_fr": "https://www.cnrtl.fr/definition/variable", "fon_en": "/ˈveə.ri.ə.bəl/", "fon_es": "[baˈɾja.βle]", "fon_fr": "[va.ʁja.bl]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/variable", "fuente_fon_es": "https://es.wiktionary.org/wiki/variable", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/variable", "comentario": ""}, {"term_en": "Variance", "term_es": "Varianza", "term_fr": "Variance", "campo": "Descriptive Statistics", "simbolo": "σ² (población) / s² (muestra)", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A measure of statistical dispersion that quantifies how far data values are spread from the mean, calculated as the average of squared deviations.", "def_es": "Medida de dispersión estadística que cuantifica cuánto se alejan los valores de la media, calculada como el promedio de las desviaciones al cuadrado. Media de las desviaciones cuadráticas de una variable aleatoria, referidas al valor medio de esta.", "def_fr": "Mesure de dispersion statistique qui quantifie l'écart des valeurs par rapport à la moyenne, calculée comme la moyenne des carrés des écarts. Mesure de l'importance d'étalement ou de dispersion d'un ensemble de valeurs autour de leur moyenne, égale au carré de l'écart type.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/varianza", "fuente_def_fr": "https://www.cnrtl.fr/definition/variance", "fon_en": "/ˈveə.ri.əns/", "fon_es": "[baˈɾjan.sa]", "fon_fr": "[va.ʁjɑ̃s]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/variance", "fuente_fon_es": "https://es.wiktionary.org/wiki/varianza", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/variance", "comentario": "JULIAN STEEVEN VALENCIA CONEO"}];
+
+    const searchInput = document.getElementById('search-input');
+    const termList = document.getElementById('term-list');
+    const termCount = document.getElementById('term-count');
+    const welcomeState = document.getElementById('welcome-state');
+    const entryView = document.getElementById('entry-view');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const termItems = document.querySelectorAll('.term-item');
+
+    let activeFilter = 'all';
+
+    function normalizeStr(str) {
+      return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function filterTerms() {
+      const query = normalizeStr(searchInput.value.trim());
+      let visible = 0;
+      let total = 0;
+
+      termItems.forEach(item => {
+        const campo = item.dataset.campo;
+        const matchesFilter = activeFilter === 'all' || campo === activeFilter;
+        if (matchesFilter) total++;
+
+        const en = normalizeStr(item.dataset.en);
+        const es = normalizeStr(item.dataset.es);
+        const fr = normalizeStr(item.dataset.fr);
+        const matchesSearch = !query || en.includes(query) || es.includes(query) || fr.includes(query);
+
+        if (matchesSearch && matchesFilter) {
+          item.style.display = '';
+          visible++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      termCount.textContent = `Mostrando ${visible} de ${total} entradas`;
+    }
+
+    function safeHostname(url) {
+      try { return new URL(url).hostname; } catch { return url; }
+    }
+
+    function showEntry(index) {
+      const term = glossary[index];
+
+      termItems.forEach(item => item.classList.remove('active'));
+      const activeItem = termList.querySelector(`[data-index="${index}"]`);
+      if (activeItem) activeItem.classList.add('active');
+
+      document.getElementById('entry-number').textContent = String(index + 1).padStart(2, '0');
+      document.getElementById('entry-title-en').textContent = term.term_en;
+      document.getElementById('entry-title-es').textContent = term.term_es;
+      document.getElementById('entry-title-fr').textContent = term.term_fr;
+      document.getElementById('entry-symbol').textContent = term.simbolo;
+
+      const campoEl = document.getElementById('entry-campo');
+      campoEl.textContent = term.campo === 'Descriptive Statistics' ? 'DESCRIPTIVA' : 'INFERENCIAL';
+      campoEl.className = 'tag-campo ' + (term.campo === 'Descriptive Statistics' ? 'campo-desc' : 'campo-inf');
+
+      const langs = [
+        { key: 'en', label: 'ENGLISH' },
+        { key: 'es', label: 'ESPAÑOL' },
+        { key: 'fr', label: 'FRANÇAIS' },
+      ];
+
+      langs.forEach(({ key }) => {
+        document.getElementById(`card-term-${key}`).textContent = term[`term_${key}`];
+        document.getElementById(`card-gram-${key}`).textContent = term[`gram_${key}`];
+        document.getElementById(`card-phonetic-${key}`).textContent = term[`fon_${key}`];
+        document.getElementById(`card-def-${key}`).textContent = term[`def_${key}`];
+        const src = document.getElementById(`card-source-${key}`);
+        src.textContent = 'Fuente: ' + safeHostname(term[`fuente_def_${key}`]);
+        src.href = term[`fuente_def_${key}`];
+      });
+
+      welcomeState.style.display = 'none';
+      entryView.style.display = 'block';
+      entryView.classList.remove('fade-in');
+      void entryView.offsetWidth;
+      entryView.classList.add('fade-in');
+    }
+
+    termItems.forEach(item => {
+      item.addEventListener('click', () => showEntry(parseInt(item.dataset.index)));
+    });
+
+    searchInput.addEventListener('input', filterTerms);
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeFilter = btn.dataset.filter;
+        filterTerms();
+      });
+    });
+  </script>
+</body>
+</html>
