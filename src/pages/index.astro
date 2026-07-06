@@ -289,6 +289,22 @@ function badgeInfo(campo: string) {
         addSuccess: (t) => `✓ Término "${t}" agregado correctamente.`,
         selianTag: 'Asistente del glosario', selianPlaceholder: 'Pregúntame algo del glosario…',
         selianGreetPanel: '¡Hola! Soy <strong>Selian</strong>, tu asistente del glosario 📊 Pregúntame por un término, pide "estadísticas", "quiz" o escribe <em>ayuda</em>.',
+        selianGreetReply: '¡Hola! Soy Selian 👋 Puedo ayudarte a encontrar términos, explicarte su significado, darte estadísticas del glosario o lanzarte el quiz. Prueba con algo como "¿qué es la varianza?" o escribe <em>ayuda</em>.',
+        selianHelp: `Puedo con esto:<br>
+          • <strong>"¿qué es [término]?"</strong> — te doy la definición<br>
+          • <strong>"término aleatorio"</strong> — te sorprendo con uno<br>
+          • <strong>"diferencia entre X y Y"</strong> — comparo dos términos<br>
+          • <strong>"estadísticas"</strong> — te resumo el glosario<br>
+          • <strong>"quiz"</strong> — te llevo al modo autoevaluación`,
+        selianStatsIntro: (s, openText) => `El glosario tiene <strong>${s.total}</strong> entradas: ${s.nPalabras} palabras y ${s.nFrases} frases técnicas (${s.desc} de estadística descriptiva, ${s.inf} inferencial). ${openText}`,
+        selianQuizGo: '¡Vamos! Te abro el modo autoevaluación 🎯',
+        selianRandomIntro: (term, def) => `Te propongo <strong>${term.term_es}</strong> (${term.term_en} / ${term.term_fr}): ${def}`,
+        selianDiffNotFound: (name) => `No encontré "${name}" en el glosario. ¿Puedes revisar cómo lo escribiste?`,
+        selianPronounceAsk: 'Dime qué término quieres escuchar, por ejemplo "¿cómo se pronuncia varianza?"',
+        selianPronounceResult: (term) => `<strong>${term.term_es}</strong> se pronuncia ${term.fon_es || '—'} (ES), ${term.fon_en || '—'} (EN), ${term.fon_fr || '—'} (FR). Te abro su ficha para que uses el botón 🔊.`,
+        selianDefResult: (term, def) => `<strong>${term.term_es}</strong> (${term.term_en} · ${term.term_fr}): ${def}`,
+        selianNoExactSuggest: 'No encontré una coincidencia exacta, pero esto podría servirte:',
+        selianNoMatch: 'No encontré nada relacionado con eso en el glosario todavía. Prueba con el nombre de un término estadístico, o escribe <em>ayuda</em> para ver qué puedo hacer.',
         selianOpenStats: 'Te abro el panel completo…',
       },
       en: {
@@ -329,6 +345,22 @@ function badgeInfo(campo: string) {
         addSuccess: (t) => `✓ Term "${t}" added successfully.`,
         selianTag: 'Glossary assistant', selianPlaceholder: 'Ask me something about the glossary…',
         selianGreetPanel: 'Hi! I\'m <strong>Selian</strong>, your glossary assistant 📊 Ask me for a term, say "statistics", "quiz" or type <em>help</em>.',
+        selianGreetReply: 'Hi! I\'m Selian 👋 I can help you find terms, explain what they mean, give you glossary statistics, or launch the quiz. Try something like "what is variance?" or type <em>help</em>.',
+        selianHelp: `Here's what I can do:<br>
+          • <strong>"what is [term]?"</strong> — I'll give you the definition<br>
+          • <strong>"random term"</strong> — I'll surprise you with one<br>
+          • <strong>"difference between X and Y"</strong> — I'll compare two terms<br>
+          • <strong>"statistics"</strong> — I'll summarize the glossary<br>
+          • <strong>"quiz"</strong> — I'll take you to the self-quiz mode`,
+        selianStatsIntro: (s, openText) => `The glossary has <strong>${s.total}</strong> entries: ${s.nPalabras} words and ${s.nFrases} technical phrases (${s.desc} descriptive statistics, ${s.inf} inferential). ${openText}`,
+        selianQuizGo: 'Let\'s go! Opening the self-quiz mode 🎯',
+        selianRandomIntro: (term, def) => `How about <strong>${term.term_en}</strong> (${term.term_es} / ${term.term_fr}): ${def}`,
+        selianDiffNotFound: (name) => `I couldn't find "${name}" in the glossary. Could you check how you spelled it?`,
+        selianPronounceAsk: 'Tell me which term you want to hear, for example "how do you pronounce variance?"',
+        selianPronounceResult: (term) => `<strong>${term.term_en}</strong> is pronounced ${term.fon_en || '—'} (EN), ${term.fon_es || '—'} (ES), ${term.fon_fr || '—'} (FR). Opening its entry so you can use the 🔊 button.`,
+        selianDefResult: (term, def) => `<strong>${term.term_en}</strong> (${term.term_es} · ${term.term_fr}): ${def}`,
+        selianNoExactSuggest: 'I couldn\'t find an exact match, but this might help:',
+        selianNoMatch: 'I couldn\'t find anything related to that in the glossary yet. Try the name of a statistical term, or type <em>help</em> to see what I can do.',
         selianOpenStats: 'Opening the full panel…',
       },
       fr: {
@@ -369,7 +401,63 @@ function badgeInfo(campo: string) {
         addSuccess: (t) => `✓ Terme « ${t} » ajouté avec succès.`,
         selianTag: 'Assistante du glossaire', selianPlaceholder: 'Demandez-moi quelque chose sur le glossaire…',
         selianGreetPanel: 'Salut ! Je suis <strong>Selian</strong>, votre assistante du glossaire 📊 Demandez-moi un terme, dites « statistiques », « quiz » ou tapez <em>aide</em>.',
+        selianGreetReply: 'Salut ! Je suis Selian 👋 Je peux vous aider à trouver des termes, expliquer leur sens, vous donner les statistiques du glossaire ou lancer le quiz. Essayez par exemple « qu\'est-ce que la variance ? » ou tapez <em>aide</em>.',
+        selianHelp: `Voici ce que je peux faire :<br>
+          • <strong>« qu'est-ce que [terme] ? »</strong> — je vous donne la définition<br>
+          • <strong>« terme aléatoire »</strong> — je vous en propose un au hasard<br>
+          • <strong>« différence entre X et Y »</strong> — je compare deux termes<br>
+          • <strong>« statistiques »</strong> — je résume le glossaire<br>
+          • <strong>« quiz »</strong> — je vous emmène au mode auto-évaluation`,
+        selianStatsIntro: (s, openText) => `Le glossaire compte <strong>${s.total}</strong> entrées : ${s.nPalabras} mots et ${s.nFrases} expressions techniques (${s.desc} de statistique descriptive, ${s.inf} inférentielle). ${openText}`,
+        selianQuizGo: 'Allons-y ! J\'ouvre le mode auto-évaluation 🎯',
+        selianRandomIntro: (term, def) => `Je vous propose <strong>${term.term_fr}</strong> (${term.term_en} / ${term.term_es}) : ${def}`,
+        selianDiffNotFound: (name) => `Je n'ai pas trouvé « ${name} » dans le glossaire. Pouvez-vous vérifier l'orthographe ?`,
+        selianPronounceAsk: 'Dites-moi quel terme vous voulez entendre, par exemple « comment prononce-t-on variance ? »',
+        selianPronounceResult: (term) => `<strong>${term.term_fr}</strong> se prononce ${term.fon_fr || '—'} (FR), ${term.fon_en || '—'} (EN), ${term.fon_es || '—'} (ES). J'ouvre sa fiche pour que vous puissiez utiliser le bouton 🔊.`,
+        selianDefResult: (term, def) => `<strong>${term.term_fr}</strong> (${term.term_en} · ${term.term_es}) : ${def}`,
+        selianNoExactSuggest: 'Je n\'ai pas trouvé de correspondance exacte, mais ceci pourrait vous aider :',
+        selianNoMatch: 'Je n\'ai encore rien trouvé de lié à cela dans le glossaire. Essayez le nom d\'un terme statistique, ou tapez <em>aide</em> pour voir ce que je peux faire.',
         selianOpenStats: "J'ouvre le panneau complet…",
+      },
+    };
+
+    // ── Patrones de reconocimiento de Selian por idioma ──────────────
+    const SELIAN_PATTERNS = {
+      es: {
+        greeting: /^(hola|buenas|hey|hi|ola)\b/,
+        help: /ayuda|que puedes hacer|comandos/,
+        stats: /estadistica|cuantos terminos|cuantas entradas/,
+        quiz: /quiz|autoevaluacion|examen|practicar/,
+        random: /aleatorio|sorprend|cualquiera/,
+        diff: /diferencia entre (.+?) y (.+)/i,
+        pronounce: /pronunci|como se dice|como se pronuncia/,
+        pronounceClean: /pronunci\w*|como se (dice|pronuncia)|\?/gi,
+        whatIs: /qu[eé] es(?:\s+(?:la|el|un|una))?\s+(.+)/i,
+        define: /defin[ei]\w*\s+(.+)/i,
+      },
+      en: {
+        greeting: /^(hi|hello|hey|good morning|good afternoon)\b/,
+        help: /help|what can you do|commands/,
+        stats: /statistic|how many terms|how many entries/,
+        quiz: /quiz|self.?test|practice/,
+        random: /random|surprise|any term/,
+        diff: /difference between (.+?) and (.+)/i,
+        pronounce: /pronounce|how do you say/,
+        pronounceClean: /pronounce\w*|how do you say|\?/gi,
+        whatIs: /what\s+is(?:\s+(?:the|a|an))?\s+(.+)/i,
+        define: /define\s+(.+)/i,
+      },
+      fr: {
+        greeting: /^(salut|bonjour|coucou|hey|hi)\b/,
+        help: /aide|que peux.tu faire|commandes/,
+        stats: /statistique|combien de termes|combien d.entrees/,
+        quiz: /quiz|auto.?evaluation|examen|pratiquer/,
+        random: /aleatoire|au hasard|surpren/,
+        diff: /difference entre (.+?) et (.+)/i,
+        pronounce: /prononc|comment dit.on|comment prononce/,
+        pronounceClean: /prononce\w*|comment (dit|prononce).on|\?/gi,
+        whatIs: /qu.est.ce que(?:\s+(?:la|le|l’|l'|un|une))?\s+(.+)/i,
+        define: /defini\w*\s+(.+)/i,
       },
     };
 
@@ -940,93 +1028,90 @@ function badgeInfo(campo: string) {
 
     function veraSuggestionRow(matches) {
       if (!matches.length) return '';
-      const chips = matches.map((t, idx) => {
-        const realIndex = glossary.indexOf(t);
-        return `<button class="vera-chip" data-goto="${realIndex}">${t.term_es}</button>`;
+      const chips = matches.map((term) => {
+        const realIndex = glossary.indexOf(term);
+        const label = term[`term_${currentLang}`] || term.term_es;
+        return `<button class="vera-chip" data-goto="${realIndex}">${label}</button>`;
       }).join('');
       return `<div class="vera-chips">${chips}</div>`;
     }
 
     function veraRespond(rawText) {
       const text = veraNorm(rawText);
+      const p = SELIAN_PATTERNS[currentLang] || SELIAN_PATTERNS.es;
 
       // Saludo
-      if (/^(hola|buenas|hey|hi|ola)\b/.test(text)) {
-        return `¡Hola! Soy Selian 👋 Puedo ayudarte a encontrar términos, explicarte su significado, darte estadísticas del glosario o lanzarte el quiz. Prueba con algo como "¿qué es la varianza?" o escribe <em>ayuda</em>.`;
+      if (p.greeting.test(text)) {
+        return t('selianGreetReply');
       }
 
       // Ayuda
-      if (/ayuda|help|que puedes hacer|comandos/.test(text)) {
-        return `Puedo con esto:<br>
-          • <strong>"¿qué es [término]?"</strong> — te doy la definición en los 3 idiomas<br>
-          • <strong>"término aleatorio"</strong> — te sorprendo con uno<br>
-          • <strong>"diferencia entre X y Y"</strong> — comparo dos términos<br>
-          • <strong>"estadísticas"</strong> — te resumo el glosario<br>
-          • <strong>"quiz"</strong> — te llevo al modo autoevaluación`;
+      if (p.help.test(text)) {
+        return t('selianHelp');
       }
 
       // Estadísticas
-      if (/estadistica|cuantos terminos|cuantas entradas/.test(text)) {
+      if (p.stats.test(text)) {
         const s = computeStats();
-        setTimeout(() => {
-          statsStartBtn.click();
-        }, 400);
-        return `El glosario tiene <strong>${s.total}</strong> entradas: ${s.nPalabras} palabras y ${s.nFrases} frases técnicas (${s.desc} de estadística descriptiva, ${s.inf} inferencial). ${t('selianOpenStats')}`;
+        setTimeout(() => { statsStartBtn.click(); }, 400);
+        return t('selianStatsIntro')(s, t('selianOpenStats'));
       }
 
       // Quiz
-      if (/quiz|autoevaluacion|examen|practicar/.test(text)) {
+      if (p.quiz.test(text)) {
         setTimeout(() => quizStartBtn.click(), 400);
-        return `¡Vamos! Te abro el modo autoevaluación 🎯`;
+        return t('selianQuizGo');
       }
 
       // Término aleatorio
-      if (/aleatorio|random|sorprend|cualquiera/.test(text)) {
+      if (p.random.test(text)) {
         const foundTerm = glossary[Math.floor(Math.random() * glossary.length)];
         const idx = glossary.indexOf(foundTerm);
         setTimeout(() => showEntry(idx), 300);
-        return `Te propongo <strong>${foundTerm.term_es}</strong> (${foundTerm.term_en} / ${foundTerm.term_fr}): ${foundTerm[`def_${currentLang}`] || foundTerm.def_es}`;
+        return t('selianRandomIntro')(foundTerm, foundTerm[`def_${currentLang}`] || foundTerm.def_es);
       }
 
       // Diferencia entre X y Y
-      const diffMatch = rawText.match(/diferencia entre (.+?) y (.+)/i);
+      const diffMatch = rawText.match(p.diff);
       if (diffMatch) {
         const a = veraFindTerm(diffMatch[1]);
         const b = veraFindTerm(diffMatch[2]);
         if (a && b) {
-          return `<strong>${a.term_es}:</strong> ${a[`def_${currentLang}`] || a.def_es}<br><br><strong>${b.term_es}:</strong> ${b[`def_${currentLang}`] || b.def_es}`;
+          const defA = a[`def_${currentLang}`] || a.def_es;
+          const defB = b[`def_${currentLang}`] || b.def_es;
+          return `<strong>${a[`term_${currentLang}`] || a.term_es}:</strong> ${defA}<br><br><strong>${b[`term_${currentLang}`] || b.term_es}:</strong> ${defB}`;
         }
-        if (!a) return `No encontré "${diffMatch[1].trim()}" en el glosario. ¿Puedes revisar cómo lo escribiste?`;
-        if (!b) return `No encontré "${diffMatch[2].trim()}" en el glosario. ¿Puedes revisar cómo lo escribiste?`;
+        if (!a) return t('selianDiffNotFound')(diffMatch[1].trim());
+        if (!b) return t('selianDiffNotFound')(diffMatch[2].trim());
       }
 
       // Pronunciación
-      if (/pronunci|como se dice|como se pronuncia/.test(text)) {
-        const cleaned = rawText.replace(/pronunci\w*|como se (dice|pronuncia)|\?/gi, '').trim();
+      if (p.pronounce.test(text)) {
+        const cleaned = rawText.replace(p.pronounceClean, '').trim();
         const foundTerm = veraFindTerm(cleaned);
         if (foundTerm) {
           setTimeout(() => showEntry(glossary.indexOf(foundTerm)), 300);
-          return `<strong>${foundTerm.term_es}</strong> se pronuncia ${foundTerm.fon_es || '—'} (ES), ${foundTerm.fon_en || '—'} (EN), ${foundTerm.fon_fr || '—'} (FR). Te abro su ficha para que uses el botón 🔊.`;
+          return t('selianPronounceResult')(foundTerm);
         }
-        return `Dime qué término quieres escuchar, por ejemplo "¿cómo se pronuncia varianza?"`;
+        return t('selianPronounceAsk');
       }
 
       // Qué es X / definición directa
-      const queMatch = rawText.match(/qu[eé] es(?:\s+(?:la|el|un|una))?\s+(.+)/i) || rawText.match(/defin[ei]\w*\s+(.+)/i);
+      const queMatch = rawText.match(p.whatIs) || rawText.match(p.define);
       const candidate = queMatch ? queMatch[1].replace(/\?/g, '').trim() : rawText;
       const direct = veraFindTerm(candidate);
       if (direct) {
         setTimeout(() => showEntry(glossary.indexOf(direct)), 300);
-        return `<strong>${direct.term_es}</strong> (${direct.term_en} · ${direct.term_fr}): ${direct[`def_${currentLang}`] || direct.def_es}`;
+        return t('selianDefResult')(direct, direct[`def_${currentLang}`] || direct.def_es);
       }
 
       // Búsqueda difusa como último recurso
       const matches = veraFindAllMatches(rawText);
       if (matches.length) {
-        return `No encontré una coincidencia exacta, pero esto podría servirte:` + veraSuggestionRow(matches);
+        return t('selianNoExactSuggest') + veraSuggestionRow(matches);
       }
 
-      return `No encontré nada relacionado con eso en el glosario todavía. Prueba con el nombre de un término estadístico, o escribe <em>ayuda</em> para ver qué puedo hacer.`;
+      return t('selianNoMatch');
     }
 
     function openVera() {
