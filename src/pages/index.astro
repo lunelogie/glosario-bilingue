@@ -1,6 +1,12 @@
 ---
-// Datos quemados directamente en el componente
+// Datos: fuente única (glossary.json). Se inyectan al cliente vía define:vars.
 import glossaryRaw from '../data/glossary.json';
+
+function badgeInfo(campo: string) {
+  if (campo === 'Descriptive Statistics') return { cls: 'badge-desc', label: 'DESC' };
+  if (campo === 'Inferential Statistics') return { cls: 'badge-inf', label: 'INF' };
+  return { cls: 'badge-frase', label: 'FRASE' };
+}
 ---
 
 <!DOCTYPE html>
@@ -12,7 +18,7 @@ import glossaryRaw from '../data/glossary.json';
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles/global.css" />
 </head>
 <body>
@@ -20,10 +26,17 @@ import glossaryRaw from '../data/glossary.json';
 
     <aside class="sidebar">
       <div class="sidebar-header">
-        {/* <div class="logo-mark">&Sigma;</div> */}
         <div class="logo-text">
           <span class="logo-title">Glosario</span>
-          <span class="logo-sub">Estadístico Trilingüe</span>
+          <span class="logo-sub" data-i18n="subtitle">Estadístico Trilingüe</span>
+        </div>
+        <div class="header-actions">
+          <div class="lang-switch" id="lang-switch">
+            <button class="lang-switch-btn active" data-lang="es">ES</button>
+            <button class="lang-switch-btn" data-lang="en">EN</button>
+            <button class="lang-switch-btn" data-lang="fr">FR</button>
+          </div>
+          <button id="theme-toggle" class="theme-toggle" title="Cambiar tema" aria-label="Cambiar tema">🌙</button>
         </div>
       </div>
 
@@ -32,47 +45,58 @@ import glossaryRaw from '../data/glossary.json';
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
         </svg>
         <input type="text" id="search-input" class="search-input"
+          data-i18n-placeholder="searchPlaceholder"
           placeholder="Buscar en inglés, español o francés…"
           autocomplete="off" spellcheck="false" />
       </div>
 
       <div class="filter-row">
-        <button class="filter-btn active" data-filter="all">Todos</button>
-        <button class="filter-btn" data-filter="Descriptive Statistics">Descriptiva</button>
-        <button class="filter-btn" data-filter="Inferential Statistics">Inferencial</button>
+        <button class="filter-btn active" data-filter="all" data-i18n="filterAll">Todos</button>
+        <button class="filter-btn" data-filter="Descriptive Statistics" data-i18n="filterDesc">Descriptiva</button>
+        <button class="filter-btn" data-filter="Inferential Statistics" data-i18n="filterInf">Inferencial</button>
+        <button class="filter-btn" data-filter="Technical Phrases" data-i18n="filterPhrases">Frases</button>
       </div>
 
-      <div class="term-count" id="term-count">Mostrando 31 de 31 entradas</div>
+      <div class="term-count" id="term-count">Mostrando {glossaryRaw.length} de {glossaryRaw.length} entradas</div>
+
+      <div class="action-row">
+        <button id="quiz-start" class="action-btn action-btn-gold" data-i18n="actionQuiz">✦ Autoevaluación</button>
+        <button id="stats-start" class="action-btn action-btn-outline" data-i18n="actionStats">📊 Estadísticas</button>
+        <button id="add-start" class="action-btn action-btn-outline" data-i18n="actionAdd">➕ Agregar término</button>
+      </div>
 
       <nav class="term-list" id="term-list">
-        {glossaryRaw.map((term, i) => (
-          <button
-            class="term-item"
-            data-index={String(i)}
-            data-en={term.term_en.toLowerCase()}
-            data-es={term.term_es.toLowerCase()}
-            data-fr={term.term_fr.toLowerCase()}
-            data-campo={term.campo}
-          >
-            <span class="term-num">{String(i + 1).padStart(2, '0')}</span>
-            <span class="term-label">{term.term_en}</span>
-			<span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
-			<span class="term-label term-label-es">{term.term_es}</span>
-			<span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
-			<span class="term-label term-label-fr">{term.term_fr}</span>
-            <span class={`term-badge ${term.campo === 'Descriptive Statistics' ? 'badge-desc' : 'badge-inf'}`}>
-              {term.campo === 'Descriptive Statistics' ? 'DESC' : 'INF'}
-            </span>
-          </button>
-        ))}
+        {glossaryRaw.map((term, i) => {
+          const b = badgeInfo(term.campo);
+          return (
+            <button
+              class="term-item"
+              data-index={String(i)}
+              data-en={term.term_en.toLowerCase()}
+              data-es={term.term_es.toLowerCase()}
+              data-fr={term.term_fr.toLowerCase()}
+              data-campo={term.campo}
+            >
+              <span class="term-num">{String(i + 1).padStart(2, '0')}</span>
+              <span class="term-label">{term.term_en}</span>
+              <span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+              <span class="term-label term-label-es">{term.term_es}</span>
+              <span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+              <span class="term-label term-label-fr">{term.term_fr}</span>
+              <span class={`term-badge ${b.cls}`}>{b.label}</span>
+            </button>
+          );
+        })}
       </nav>
+
+      <div class="sidebar-credit"><span data-i18n="creditPrefix">Realizado por</span>: Selene Arcos y Julián Valencia</div>
     </aside>
 
     <main class="main-panel" id="main-panel">
       <div class="welcome-state" id="welcome-state">
         <div class="welcome-symbol">&Sigma;</div>
-        <h2 class="welcome-title">Selecciona un término</h2>
-        <p class="welcome-sub">Elige una entrada del glosario para ver su ficha terminológica completa en los tres idiomas.</p>
+        <h2 class="welcome-title" data-i18n="welcomeTitle">Selecciona un término</h2>
+        <p class="welcome-sub" data-i18n="welcomeSub">Elige una entrada del glosario para ver su ficha terminológica completa en los tres idiomas.</p>
       </div>
 
       <div class="entry-view" id="entry-view" style="display:none">
@@ -90,19 +114,23 @@ import glossaryRaw from '../data/glossary.json';
           <div class="entry-meta-tags">
             <span class="tag-symbol" id="entry-symbol"></span>
             <span class="tag-campo" id="entry-campo"></span>
+            <span class="tag-nivel" id="entry-nivel" style="display:none"></span>
           </div>
         </div>
+
+        <div class="entry-contexto" id="entry-contexto" style="display:none"></div>
 
         <div class="cards-grid">
           <div class="lang-card card-en">
             <div class="card-lang-header">
               <img class="flag" src="/reino-unido.png" alt="English" />
               <span class="lang-label">ENGLISH</span>
+              <button class="play-btn" data-lang="en" data-voice="en-US" aria-label="Escuchar en inglés">🔊</button>
             </div>
             <h3 class="card-term" id="card-term-en"></h3>
             <p class="card-gram" id="card-gram-en"></p>
             <p class="card-phonetic" id="card-phonetic-en"></p>
-            <div class="card-section-label">DEFINITION</div>
+            <div class="card-section-label" id="card-label-en">DEFINITION</div>
             <p class="card-def" id="card-def-en"></p>
             <a class="card-source" id="card-source-en" href="#" target="_blank" rel="noopener"></a>
           </div>
@@ -111,11 +139,12 @@ import glossaryRaw from '../data/glossary.json';
             <div class="card-lang-header">
               <img class="flag" src="/mundo.png" alt="Español" />
               <span class="lang-label">ESPAÑOL</span>
+              <button class="play-btn" data-lang="es" data-voice="es-ES" aria-label="Escuchar en español">🔊</button>
             </div>
             <h3 class="card-term" id="card-term-es"></h3>
             <p class="card-gram" id="card-gram-es"></p>
             <p class="card-phonetic" id="card-phonetic-es"></p>
-            <div class="card-section-label">DEFINICIÓN</div>
+            <div class="card-section-label" id="card-label-es">DEFINICIÓN</div>
             <p class="card-def" id="card-def-es"></p>
             <a class="card-source" id="card-source-es" href="#" target="_blank" rel="noopener"></a>
           </div>
@@ -124,42 +153,302 @@ import glossaryRaw from '../data/glossary.json';
             <div class="card-lang-header">
               <img class="flag" src="/francia.png" alt="Français" />
               <span class="lang-label">FRANÇAIS</span>
+              <button class="play-btn" data-lang="fr" data-voice="fr-FR" aria-label="Escuchar en francés">🔊</button>
             </div>
             <h3 class="card-term" id="card-term-fr"></h3>
             <p class="card-gram" id="card-gram-fr"></p>
             <p class="card-phonetic" id="card-phonetic-fr"></p>
-            <div class="card-section-label">DÉFINITION</div>
+            <div class="card-section-label" id="card-label-fr">DÉFINITION</div>
             <p class="card-def" id="card-def-fr"></p>
             <a class="card-source" id="card-source-fr" href="#" target="_blank" rel="noopener"></a>
           </div>
         </div>
       </div>
+
+      <div class="stats-view" id="stats-view" style="display:none"></div>
     </main>
   </div>
 
-  <script>
-    const glossary = [{"term_en": "Correlation", "term_es": "Correlación", "term_fr": "Corrélation", "campo": "Inferential Statistics", "simbolo": "r / ρ", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical measure of the strength and direction of the linear relationship between two variables, ranging from −1 to +1.", "def_es": "Medida estadística de la fuerza y la dirección de la relación lineal entre dos variables, con valores entre −1 y +1.", "def_fr": "Mesure statistique de la force et de la direction de la relation linéaire entre deux variables, dont les valeurs vont de −1 à +1.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-3-the-regression-equation", "fuente_def_es": "https://dle.rae.es/correlaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˌkɒr.əˈleɪ.ʃən/", "fon_es": "[ko.re.laˈsjon]", "fon_fr": "[kɔ.ʁe.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Correlation coefficient", "term_es": "Coeficiente de correlación", "term_fr": "Coefficient de corrélation", "campo": "Inferential Statistics", "simbolo": "r / ρ", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A numerical measure that quantifies the strength and direction of the linear relationship between two variables, typically ranging from -1 to +1.", "def_es": "Medida numérica que cuantifica la fuerza y dirección de la relación lineal entre dos variables, generalmente con valores entre -1 y +1.", "def_fr": "Mesure numérique qui quantifie la force et la direction de la relation linéaire entre deux variables, généralement comprise entre -1 et +1.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095637394", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=coeficiente+de+correlaci%C3%B3n&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˌkɒr.əˈleɪ.ʃən ˌkoʊ.ɪˈfɪʃ.ənt/", "fon_es": "[koe.fi.ˈsjen.te ðe ko.re.laˈsjon]", "fon_fr": "[kɔ.e.fi.sjɑ̃ də kɔ.ʁe.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Covariance", "term_es": "Covarianza", "term_fr": "Covariance", "campo": "Inferential Statistics", "simbolo": "Cov(X,Y) / sxy", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A measure of the joint variability of two random variables, indicating how much they change together; positive values indicate a direct relationship, negative values an inverse one.", "def_es": "Medida de la variabilidad conjunta de dos variables aleatorias, que indica en qué medida cambian juntas; valores positivos indican una relación directa y valores negativos una relación inversa.", "def_fr": "Mesure de la variabilité conjointe de deux variables aléatoires, indiquant dans quelle mesure elles varient ensemble; les valeurs positives indiquent une relation directe, les valeurs négatives une relation inverse.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095640834", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=covarianza&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/covariance", "fon_en": "/koʊˈveər.i.əns/", "fon_es": "[ko.βaˈɾjan.sa]", "fon_fr": "[ko.va.ʁjɑ̃s]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/covariance", "fuente_fon_es": "https://es.wiktionary.org/wiki/covarianza", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/covariance", "comentario": ""}, {"term_en": "Degrees of freedom", "term_es": "Grados de libertad", "term_fr": "Degrés de liberté", "campo": "Inferential Statistics", "simbolo": "df / gl", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina plural (loc.n.m.pl.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "The number of independent values that can vary in a statistical calculation; typically equal to the sample size minus the number of estimated parameters.", "def_es": "Número de valores independientes que pueden variar en un cálculo estadístico; generalmente igual al tamaño de la muestra menos el número de parámetros estimados.", "def_fr": "Nombre de valeurs indépendantes pouvant varier dans un calcul statistique; généralement égal à la taille de l'échantillon moins le nombre de paramètres estimés.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095734874", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=grados+de+libertad&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/libert%C3%A9", "fon_en": "/dɪˈɡriːz əv ˈfriː.dəm/", "fon_es": "[ˈɡɾa.ðos ðe li.βeɾˈtað]", "fon_fr": "[de.ɡʁe də li.bɛʁ.te]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/degree", "fuente_fon_es": "https://es.wiktionary.org/wiki/grado", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/degr%C3%A9", "comentario": ""}, {"term_en": "Deviation", "term_es": "Desviación", "term_fr": "Déviation", "campo": "Descriptive Statistics", "simbolo": "d", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The difference between an individual data value and a reference value, typically the mean, indicating how far that value departs from the center of the distribution.", "def_es": "Diferencia entre un valor individual y un valor de referencia, habitualmente la media, que indica cuánto se aleja ese valor del centro de la distribución.", "def_fr": "Différence entre une valeur individuelle et une valeur de référence, généralement la moyenne, indiquant l'éloignement de cette valeur par rapport au centre de la distribution.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda356.htm", "fuente_def_es": "https://dle.rae.es/desviaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/d%C3%A9viation", "fon_en": "/ˌdiː.viˈeɪ.ʃən/", "fon_es": "[des.βjaˈsjon]", "fon_fr": "[de.vja.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/deviation", "fuente_fon_es": "https://es.wiktionary.org/wiki/desviaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/d%C3%A9viation", "comentario": ""}, {"term_en": "Error", "term_es": "Error", "term_fr": "Erreur", "campo": "Inferential Statistics", "simbolo": "e / ε", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The difference between an observed value and a true or expected value; in statistics, it refers to variability that cannot be explained by the model.", "def_es": "Diferencia entre un valor observado y un valor verdadero o esperado; en estadística, se refiere a la variabilidad que no puede ser explicada por el modelo.", "def_fr": "Différence entre une valeur observée et une valeur vraie ou attendue; en statistique, il désigne la variabilité qui ne peut pas être expliquée par le modèle.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095825038", "fuente_def_es": "https://dle.rae.es/error", "fuente_def_fr": "https://www.cnrtl.fr/definition/erreur", "fon_en": "/ˈer.ər/", "fon_es": "[eˈroɾ]", "fon_fr": "[e.ʁœʁ]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/error", "fuente_fon_es": "https://es.wiktionary.org/wiki/error", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/erreur", "comentario": ""}, {"term_en": "F-statistic", "term_es": "Estadístico F", "term_fr": "Statistique F", "campo": "Inferential Statistics", "simbolo": "F", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A ratio of two variances used in ANOVA and regression analysis to test whether group means differ significantly or whether a model explains a significant amount of variance.", "def_es": "Cociente de dos varianzas utilizado en ANOVA y análisis de regresión para determinar si las medias de los grupos difieren significativamente o si un modelo explica una cantidad significativa de varianza.", "def_fr": "Rapport de deux variances utilisé dans l'ANOVA et l'analyse de régression pour tester si les moyennes des groupes diffèrent significativement ou si un modèle explique une part significative de la variance.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095853165", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=estad%C3%ADstico+F&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/statistique", "fon_en": "/ɛf stəˈtɪs.tɪk/", "fon_es": "[es.ta.ˈðis.ti.ko ˈe.fe]", "fon_fr": "[sta.tis.tik ɛf]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/statistic", "fuente_fon_es": "https://es.wiktionary.org/wiki/estad%C3%ADstico", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/statistique", "comentario": ""}, {"term_en": "Hypothesis", "term_es": "Hipótesis", "term_fr": "Hypothèse", "campo": "Inferential Statistics", "simbolo": "H₀ / H₁", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A testable statement or proposition about a population parameter, serving as the basis for statistical testing; includes the null hypothesis (H₀) and the alternative hypothesis (H₁).", "def_es": "Proposición o afirmación verificable sobre un parámetro poblacional, que sirve de base para la contrastación estadística; incluye la hipótesis nula (H₀) y la hipótesis alternativa (H₁).", "def_fr": "Proposition ou affirmation vérifiable sur un paramètre de population, servant de base aux tests statistiques; comprend l'hypothèse nulle (H₀) et l'hypothèse alternative (H₁).", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095959660", "fuente_def_es": "https://dle.rae.es/hip%C3%B3tesis", "fuente_def_fr": "https://www.cnrtl.fr/definition/hypoth%C3%A8se", "fon_en": "/haɪˈpɒθ.ɪ.sɪs/", "fon_es": "[i.ˈpo.te.sis]", "fon_fr": "[i.pɔ.tɛz]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/hypothesis", "fuente_fon_es": "https://es.wiktionary.org/wiki/hip%C3%B3tesis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/hypoth%C3%A8se", "comentario": ""}, {"term_en": "Hypothesis test", "term_es": "Prueba de hipótesis", "term_fr": "Test d'hypothèse", "campo": "Inferential Statistics", "simbolo": "H₀ / H₁", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A formal statistical procedure used to evaluate the evidence against a null hypothesis, leading to a decision to reject or fail to reject it based on sample data.", "def_es": "Procedimiento estadístico formal utilizado para evaluar la evidencia en contra de una hipótesis nula, que lleva a una decisión de rechazarla o no rechazarla en función de los datos muestrales.", "def_fr": "Procédure statistique formelle permettant d'évaluer les preuves contre une hypothèse nulle, conduisant à la décision de la rejeter ou non sur la base des données d'un échantillon.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095959660", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=prueba+de+hip%C3%B3tesis&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/hypoth%C3%A8se", "fon_en": "/haɪˈpɒθ.ɪ.sɪs test/", "fon_es": "[ˈpɾwe.βa ðe i.ˈpo.te.sis]", "fon_fr": "[tɛst d‿i.pɔ.tɛz]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/hypothesis", "fuente_fon_es": "https://es.wiktionary.org/wiki/hip%C3%B3tesis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/hypoth%C3%A8se", "comentario": ""}, {"term_en": "Kurtosis", "term_es": "Curtosis", "term_fr": "Aplatissement / Kurtosis", "campo": "Descriptive Statistics", "simbolo": "γ₂ / β₂", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "A measure of the shape of a distribution's tails relative to a normal distribution; high kurtosis (leptokurtic) indicates heavier tails, low kurtosis (platykurtic) indicates lighter tails.", "def_es": "Medida de la forma de las colas de una distribución en relación con la distribución normal; una curtosis alta (leptocúrtica) indica colas más pesadas, y una baja (platicúrtica) indica colas más ligeras.", "def_fr": "Mesure de la forme des queues d'une distribution par rapport à la distribution normale; une kurtosis élevée (leptokurtique) indique des queues plus lourdes, une kurtosis faible (platykurtique) des queues plus légères.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=curtosis&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/aplatissement", "fon_en": "/kɜːˈtoʊ.sɪs/", "fon_es": "[kuɾˈto.sis]", "fon_fr": "[kyʁ.to.zis]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/kurtosis", "fuente_fon_es": "https://es.wiktionary.org/wiki/curtosis", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/kurtosis", "comentario": ""}, {"term_en": "Maximum", "term_es": "Máximo", "term_fr": "Maximum", "campo": "Descriptive Statistics", "simbolo": "max", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The largest value in a dataset or within a defined range.", "def_es": "El valor más grande de un conjunto de datos o dentro de un rango definido.", "def_fr": "La plus grande valeur d'un ensemble de données ou dans une plage définie.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100143614", "fuente_def_es": "https://dle.rae.es/m%C3%A1ximo", "fuente_def_fr": "https://www.cnrtl.fr/definition/maximum", "fon_en": "/ˈmæk.sɪ.məm/", "fon_es": "[ˈmak.si.mo]", "fon_fr": "[mak.si.mɔm]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/maximum", "fuente_fon_es": "https://es.wiktionary.org/wiki/m%C3%A1ximo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/maximum", "comentario": ""}, {"term_en": "Mean", "term_es": "Media / Promedio", "term_fr": "Moyenne", "campo": "Descriptive Statistics", "simbolo": "x̄ (muestra) / μ (población)", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The arithmetic average of a dataset, calculated by dividing the sum of all values by the number of observations.", "def_es": "Promedio aritmético de un conjunto de datos, calculado dividiendo la suma de todos los valores entre el número de observaciones.", "def_fr": "Moyenne arithmétique d'un ensemble de données, calculée en divisant la somme de toutes les valeurs par le nombre d'observations.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/media", "fuente_def_fr": "https://www.insee.fr/fr/metadonnees/definition/c1711", "fon_en": "/miːn/", "fon_es": "[ˈme.dja]", "fon_fr": "[mwa.jɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/mean", "fuente_fon_es": "https://es.wiktionary.org/wiki/media", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/moyenne", "comentario": ""}, {"term_en": "Median", "term_es": "Mediana", "term_fr": "Médiane", "campo": "Descriptive Statistics", "simbolo": "Md / Me", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The middle value of an ordered dataset that divides it into two equal halves; for an even number of values, it is the average of the two central values.", "def_es": "Valor central de un conjunto de datos ordenados que lo divide en dos mitades iguales; si el número de valores es par, es la media de los dos valores centrales.", "def_fr": "Valeur centrale d'un ensemble de données ordonné qui le divise en deux moitiés égales; si le nombre de valeurs est pair, il s'agit de la moyenne des deux valeurs centrales.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/mediana", "fuente_def_fr": "https://www.insee.fr/fr/metadonnees/definition/c1713", "fon_en": "/ˈmiː.di.ən/", "fon_es": "[meˈdja.na]", "fon_fr": "[me.djɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/median", "fuente_fon_es": "https://es.wiktionary.org/wiki/mediana", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/m%C3%A9diane", "comentario": ""}, {"term_en": "Minimum", "term_es": "Mínimo", "term_fr": "Minimum", "campo": "Descriptive Statistics", "simbolo": "min", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The smallest value in a dataset or within a defined range.", "def_es": "El valor más pequeño de un conjunto de datos o dentro de un rango definido.", "def_fr": "La plus petite valeur d'un ensemble de données ou dans une plage définie.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100200448", "fuente_def_es": "https://dle.rae.es/m%C3%ADnimo", "fuente_def_fr": "https://www.cnrtl.fr/definition/minimum", "fon_en": "/ˈmɪn.ɪ.məm/", "fon_es": "[ˈmi.ni.mo]", "fon_fr": "[mi.ni.mɔm]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/minimum", "fuente_fon_es": "https://es.wiktionary.org/wiki/m%C3%ADnimo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/minimum", "comentario": ""}, {"term_en": "Mode", "term_es": "Moda", "term_fr": "Mode", "campo": "Descriptive Statistics", "simbolo": "Mo", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "The value that appears most frequently in a dataset; a dataset may be unimodal, bimodal, or multimodal.", "def_es": "Valor que aparece con mayor frecuencia en un conjunto de datos; una distribución puede ser unimodal, bimodal o multimodal.", "def_fr": "Valeur qui apparaît le plus fréquemment dans un ensemble de données; une distribution peut être unimodale, bimodale ou multimodale.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-5-measures-of-the-center-of-the-data", "fuente_def_es": "https://dle.rae.es/moda", "fuente_def_fr": "https://gdt.oqlf.gouv.qc.ca/ficheOqlf.aspx?Id_Fiche=8360395", "fon_en": "/moʊd/", "fon_es": "[ˈmo.ða]", "fon_fr": "[mɔd]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/mode", "fuente_fon_es": "https://es.wiktionary.org/wiki/moda", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/mode", "comentario": ""}, {"term_en": "N (population size)", "term_es": "N (tamaño de la población)", "term_fr": "N (taille de la population)", "campo": "Descriptive Statistics", "simbolo": "N", "gram_en": "symbol / noun (symb.)", "gram_es": "símbolo / sustantivo (simb.)", "gram_fr": "symbole / nom (symb.)", "def_en": "The total number of individuals or observations that make up a population.", "def_es": "El número total de individuos u observaciones que conforman una población.", "def_fr": "Le nombre total d'individus ou d'observations qui constituent une population.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100352873", "fuente_def_es": "https://dle.rae.es/poblaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/population", "fon_en": "/ɛn/", "fon_es": "[ˈe.ne]", "fon_fr": "[ɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/population", "fuente_fon_es": "https://es.wiktionary.org/wiki/poblaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/population", "comentario": ""}, {"term_en": "n (sample size)", "term_es": "n (tamaño de la muestra)", "term_fr": "n (taille de l'échantillon)", "campo": "Inferential Statistics", "simbolo": "n", "gram_en": "symbol / noun (symb.)", "gram_es": "símbolo / sustantivo (simb.)", "gram_fr": "symbole / nom (symb.)", "def_en": "The number of observations or individuals included in a sample.", "def_es": "El número de observaciones o individuos incluidos en una muestra.", "def_fr": "Le nombre d'observations ou d'individus inclus dans un échantillon.", "fuente_def_en": "https://www.oxfordreference.com/display/10.1093/oi/authority.20110803100433876", "fuente_def_es": "https://dle.rae.es/muestra", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9chantillon", "fon_en": "/ɛn/", "fon_es": "[ˈe.ne]", "fon_fr": "[ɛn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/sample", "fuente_fon_es": "https://es.wiktionary.org/wiki/muestra", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9chantillon", "comentario": ""}, {"term_en": "P-value", "term_es": "Valor P", "term_fr": "Valeur P / P-valeur", "campo": "Inferential Statistics", "simbolo": "p", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "The probability of obtaining results at least as extreme as those observed, assuming the null hypothesis is true.", "def_es": "Probabilidad de obtener resultados iguales o más extremos que los observados, bajo el supuesto de que la hipótesis nula es verdadera.", "def_fr": "Probabilité d'obtenir des résultats au moins aussi extrêmes que ceux observés, en supposant que l'hypothèse nulle est vraie.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section1/prc16.htm", "fuente_def_es": "https://www.fundeu.es/recomendacion/valor-p-no-p-value/", "fuente_def_fr": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/26557677/valeur-p", "fon_en": "/ˈpiː ˌvæl.juː/", "fon_es": "[ˈβa.loɾ ˈpe]", "fon_fr": "[pe va.lœʁ]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/p-value", "fuente_fon_es": "https://es.wiktionary.org/wiki/valor", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/valeur", "comentario": ""}, {"term_en": "Pearson's r", "term_es": "R de Pearson", "term_fr": "R de Pearson", "campo": "Inferential Statistics", "simbolo": "r", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "A correlation coefficient that measures the strength and direction of the linear relationship between two quantitative variables.", "def_es": "Coeficiente de correlación que mide la fuerza y la dirección de la relación lineal entre dos variables cuantitativas.", "def_fr": "Coefficient de corrélation qui mesure la force et la direction de la relation linéaire entre deux variables quantitatives.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=coeficiente+de+Pearson&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/corr%C3%A9lation", "fon_en": "/ˈpɪər.sənz ɑːr/", "fon_es": "[ˈe.re ðe ˈpeaɾ.son]", "fon_fr": "[ɛʁ də pɛʁ.sɔn]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/correlation", "fuente_fon_es": "https://es.wiktionary.org/wiki/correlaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/corr%C3%A9lation", "comentario": ""}, {"term_en": "Population", "term_es": "Población", "term_fr": "Population", "campo": "Inferential Statistics", "simbolo": "N", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The entire set of individuals, items, or data points of interest in a statistical study.", "def_es": "Conjunto completo de individuos, elementos o datos de interés en un estudio estadístico.", "def_fr": "Ensemble complet des individus, éléments ou données d'intérêt dans une étude statistique.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/poblaci%C3%B3n", "fuente_def_fr": "https://vitrinelinguistique.oqlf.gouv.qc.ca/fiche-gdt/fiche/8377856/population", "fon_en": "/ˌpɒp.jʊˈleɪ.ʃən/", "fon_es": "[po.βlaˈsjon]", "fon_fr": "[pɔ.py.la.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/population", "fuente_fon_es": "https://es.wiktionary.org/wiki/poblaci%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/population", "comentario": ""}, {"term_en": "Power", "term_es": "Potencia de la prueba", "term_fr": "Puissance du test", "campo": "Inferential Statistics", "simbolo": "1 - β", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale féminine (loc.n.f.)", "def_en": "The probability that a statistical test correctly rejects a false null hypothesis, indicating its ability to detect an effect.", "def_es": "Probabilidad de que una prueba estadística rechace correctamente una hipótesis nula falsa, lo que indica su capacidad para detectar un efecto.", "def_fr": "Probabilité qu'un test statistique rejette correctement une hypothèse nulle fausse, indiquant sa capacité à détecter un effet.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc222.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=potencia+estad%C3%ADstica&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/puissance", "fon_en": "/ˈpaʊ.ər/", "fon_es": "[po.ˈten.sja ðe la ˈpɾwe.βa]", "fon_fr": "[pɥi.sɑ̃s dy tɛst]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/power", "fuente_fon_es": "https://es.wiktionary.org/wiki/potencia", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/puissance", "comentario": ""}, {"term_en": "Range", "term_es": "Rango / Recorrido", "term_fr": "Étendue", "campo": "Descriptive Statistics", "simbolo": "R", "gram_en": "noun (n.)", "gram_es": "sustantivo masculino (s.m.)", "gram_fr": "nom féminin (n.f.)", "def_en": "The difference between the largest and smallest values in a dataset, used as a basic measure of spread.", "def_es": "Diferencia entre el valor más grande y el más pequeño de un conjunto de datos, utilizada como medida básica de dispersión.", "def_fr": "Différence entre la valeur la plus grande et la valeur la plus petite d'un ensemble de données, utilisée comme mesure élémentaire de dispersion.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/rango", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9tendue", "fon_en": "/reɪndʒ/", "fon_es": "[ˈɾan.ɡo]", "fon_fr": "[e.tɑ̃d]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/range", "fuente_fon_es": "https://es.wiktionary.org/wiki/rango", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9tendue", "comentario": ""}, {"term_en": "Regression", "term_es": "Regresión", "term_fr": "Régression", "campo": "Inferential Statistics", "simbolo": "ŷ = a + bx", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical method used to model and analyze relationships between a dependent variable and one or more independent variables.", "def_es": "Método estadístico utilizado para modelar y analizar las relaciones entre una variable dependiente y una o más variables independientes.", "def_fr": "Méthode statistique utilisée pour modéliser et analyser les relations entre une variable dépendante et une ou plusieurs variables indépendantes.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-introduction", "fuente_def_es": "https://dle.rae.es/regresi%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/r%C3%A9gression", "fon_en": "/rɪˈɡreʃ.ən/", "fon_es": "[re.ɣɾeˈsjon]", "fon_fr": "[ʁe.ɡʁɛ.sjɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/regression", "fuente_fon_es": "https://es.wiktionary.org/wiki/regresi%C3%B3n", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/r%C3%A9gression", "comentario": ""}, {"term_en": "Residual term", "term_es": "Término residual en regresión", "term_fr": "Terme résiduel", "campo": "Inferential Statistics", "simbolo": "ε / e", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal masculina (loc.n.m.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "The difference between an observed value and the value predicted by a regression model, representing unexplained variation.", "def_es": "Diferencia entre un valor observado y el valor predicho por un modelo de regresión, que representa la variación no explicada por dicho modelo.", "def_fr": "Différence entre une valeur observée et la valeur prédite par un modèle de régression, représentant la variation non expliquée par ce modèle.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/12-2-the-regression-equation", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=t%C3%A9rmino+residual&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/r%C3%A9siduel", "fon_en": "/rɪˈzɪd.ju.əl tɜːm/", "fon_es": "[ˈteɾ.mi.no re.si.ˈðwal]", "fon_fr": "[tɛʁm ʁe.zi.dɥɛl]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/residual", "fuente_fon_es": "https://es.wiktionary.org/wiki/residual", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/r%C3%A9siduel", "comentario": ""}, {"term_en": "Sample", "term_es": "Muestra", "term_fr": "Échantillon", "campo": "Inferential Statistics", "simbolo": "n", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom masculin (n.m.)", "def_en": "A subset of a population selected for analysis to make inferences about the population.", "def_es": "Subconjunto de una población seleccionado para su análisis con el fin de realizar inferencias sobre dicha población.", "def_fr": "Sous-ensemble d'une population sélectionné pour analyse afin de formuler des inférences sur cette population.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/muestra", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9chantillon", "fon_en": "/ˈsæm.pəl/", "fon_es": "[ˈmwes.tɾa]", "fon_fr": "[e.ʃɑ̃.ti.jɔ̃]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/sample", "fuente_fon_es": "https://es.wiktionary.org/wiki/muestra", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9chantillon", "comentario": ""}, {"term_en": "Significant", "term_es": "Significativo / significativa", "term_fr": "Significatif / significative", "campo": "Inferential Statistics", "simbolo": "—", "gram_en": "adjective (adj.)", "gram_es": "adjetivo (adj.)", "gram_fr": "adjectif (adj.)", "def_en": "A result is considered statistically significant if it is unlikely to have occurred by chance under the null hypothesis.", "def_es": "Un resultado se considera estadísticamente significativo cuando es poco probable que haya ocurrido por azar bajo la hipótesis nula.", "def_fr": "Un résultat est considéré statistiquement significatif lorsqu'il est peu probable qu'il soit dû au hasard sous l'hypothèse nulle.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc2.htm", "fuente_def_es": "https://dle.rae.es/significativo", "fuente_def_fr": "https://www.cnrtl.fr/definition/significatif", "fon_en": "/sɪɡˈnɪf.ɪ.kənt/", "fon_es": "[siɣ.ni.fiˈka.ti.βo]", "fon_fr": "[si.ɲi.fi.ka.tif]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/significant", "fuente_fon_es": "https://es.wiktionary.org/wiki/significativo", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/significatif", "comentario": ""}, {"term_en": "Skewness", "term_es": "Asimetría", "term_fr": "Asymétrie", "campo": "Descriptive Statistics", "simbolo": "γ₁ / g₁", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A statistical measure that describes the degree and direction of asymmetry in a distribution.", "def_es": "Medida estadística que describe el grado y la dirección de la asimetría de una distribución.", "def_fr": "Mesure statistique décrivant le degré et la direction de l'asymétrie d'une distribution.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda35b.htm", "fuente_def_es": "https://dle.rae.es/asimetr%C3%ADa", "fuente_def_fr": "https://www.cnrtl.fr/definition/asym%C3%A9trie", "fon_en": "/ˈskjuː.nəs/", "fon_es": "[a.si.meˈtɾi.a]", "fon_fr": "[a.si.me.tʁi]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/skewness", "fuente_fon_es": "https://es.wiktionary.org/wiki/asimetr%C3%ADa", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/asym%C3%A9trie", "comentario": ""}, {"term_en": "Standard deviation", "term_es": "Desviación estándar", "term_fr": "Écart-type", "campo": "Descriptive Statistics", "simbolo": "σ (población) / s (muestra)", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale masculine composée (loc.n.m.)", "def_en": "A measure of variability that indicates the typical distance of data points from the mean, expressed in the same units as the data.", "def_es": "Medida de variabilidad que indica la distancia típica de los datos respecto a la media, expresada en las mismas unidades que los datos.", "def_fr": "Mesure de variabilité indiquant la distance typique des données par rapport à la moyenne, exprimée dans les mêmes unités que les données.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/desviaci%C3%B3n", "fuente_def_fr": "https://www.cnrtl.fr/definition/%C3%A9cart-type", "fon_en": "/ˈstæn.dəd ˌdiː.viˈeɪ.ʃən/", "fon_es": "[des.βjaˈsjon esˈtan.daɾ]", "fon_fr": "[e.kaʁ tip]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/standard%20deviation", "fuente_fon_es": "https://es.wiktionary.org/wiki/desviaci%C3%B3n_est%C3%A1ndar", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/%C3%A9cart-type", "comentario": ""}, {"term_en": "T-test", "term_es": "Prueba T", "term_fr": "Test T", "campo": "Inferential Statistics", "simbolo": "t", "gram_en": "noun phrase (n.phr.)", "gram_es": "locución nominal femenina (loc.n.f.)", "gram_fr": "locution nominale masculine (loc.n.m.)", "def_en": "A statistical hypothesis test used to determine whether there is a significant difference between the means of two groups, especially with small sample sizes.", "def_es": "Prueba de hipótesis estadística que determina si existe una diferencia significativa entre las medias de dos grupos, especialmente cuando el tamaño muestral es pequeño.", "def_fr": "Test d'hypothèse statistique permettant de déterminer s'il existe une différence significative entre les moyennes de deux groupes, notamment lorsque la taille de l'échantillon est réduite.", "fuente_def_en": "https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm", "fuente_def_es": "https://iate.europa.eu/search#advanced?query=prueba+T&sl=ES", "fuente_def_fr": "https://www.cnrtl.fr/definition/test", "fon_en": "/ˈtiː test/", "fon_es": "[ˈpɾwe.βa te]", "fon_fr": "[tɛst te]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/t-test", "fuente_fon_es": "https://es.wiktionary.org/wiki/prueba", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/test", "comentario": ""}, {"term_en": "Variable", "term_es": "Variable", "term_fr": "Variable", "campo": "Descriptive Statistics", "simbolo": "X, Y, xᵢ (depende del contexto)", "gram_en": "noun / adjective (n./adj.)", "gram_es": "sustantivo femenino / adjetivo (s.f./adj.)", "gram_fr": "nom féminin / adjectif (n.f./adj.)", "def_en": "A measurable characteristic or attribute that can take on different values across individuals or observations in a dataset.", "def_es": "Característica o atributo medible que puede tomar distintos valores en los individuos u observaciones de un conjunto de datos.", "def_fr": "Caractéristique ou attribut mesurable susceptible de prendre des valeurs différentes selon les individus ou les observations d'un ensemble de données.", "fuente_def_en": "https://openstax.org/books/statistics/pages/1-1-definitions-of-statistics-probability-and-key-terms", "fuente_def_es": "https://dle.rae.es/variable", "fuente_def_fr": "https://www.cnrtl.fr/definition/variable", "fon_en": "/ˈveə.ri.ə.bəl/", "fon_es": "[baˈɾja.βle]", "fon_fr": "[va.ʁja.bl]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/variable", "fuente_fon_es": "https://es.wiktionary.org/wiki/variable", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/variable", "comentario": ""}, {"term_en": "Variance", "term_es": "Varianza", "term_fr": "Variance", "campo": "Descriptive Statistics", "simbolo": "σ² (población) / s² (muestra)", "gram_en": "noun (n.)", "gram_es": "sustantivo femenino (s.f.)", "gram_fr": "nom féminin (n.f.)", "def_en": "A measure of statistical dispersion that quantifies how far data values are spread from the mean, calculated as the average of squared deviations.", "def_es": "Medida de dispersión estadística que cuantifica cuánto se alejan los valores de la media, calculada como el promedio de las desviaciones al cuadrado. Media de las desviaciones cuadráticas de una variable aleatoria, referidas al valor medio de esta.", "def_fr": "Mesure de dispersion statistique qui quantifie l'écart des valeurs par rapport à la moyenne, calculée comme la moyenne des carrés des écarts. Mesure de l'importance d'étalement ou de dispersion d'un ensemble de valeurs autour de leur moyenne, égale au carré de l'écart type.", "fuente_def_en": "https://openstax.org/books/introductory-statistics/pages/2-7-measures-of-the-spread-of-the-data", "fuente_def_es": "https://dle.rae.es/varianza", "fuente_def_fr": "https://www.cnrtl.fr/definition/variance", "fon_en": "/ˈveə.ri.əns/", "fon_es": "[baˈɾjan.sa]", "fon_fr": "[va.ʁjɑ̃s]", "fuente_fon_en": "https://www.merriam-webster.com/dictionary/variance", "fuente_fon_es": "https://es.wiktionary.org/wiki/varianza", "fuente_fon_fr": "https://fr.wiktionary.org/wiki/variance", "comentario": "JULIAN STEEVEN VALENCIA CONEO"}];
+  <div class="quiz-overlay" id="quiz-overlay">
+    <div class="quiz-card" id="quiz-card"></div>
+  </div>
+
+  <div class="add-overlay" id="add-overlay">
+    <div class="add-card" id="add-card"></div>
+  </div>
+
+  <button id="vera-fab" class="vera-fab" aria-label="Abrir asistente Selian">
+    <svg viewBox="0 0 40 40" class="vera-svg" aria-hidden="true">
+      <defs>
+        <linearGradient id="veraGradFab" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="var(--gold-bright)" />
+          <stop offset="100%" stop-color="var(--gold)" />
+        </linearGradient>
+      </defs>
+      <!-- orejitas de búho, apuntando hacia arriba -->
+      <path d="M10 15 L13 3 L17 13 Z" fill="url(#veraGradFab)" />
+      <path d="M30 15 L27 3 L23 13 Z" fill="url(#veraGradFab)" />
+      <!-- cuerpo redondo (tapa la base de las orejas) -->
+      <circle cx="20" cy="23" r="13" fill="url(#veraGradFab)" />
+      <!-- pechera clara -->
+      <ellipse cx="20" cy="29.5" rx="6" ry="4.5" fill="#fff" opacity="0.25" />
+      <!-- ojos -->
+      <g class="vera-eyes">
+        <circle cx="14" cy="21" r="5.2" fill="#fff" />
+        <circle cx="26" cy="21" r="5.2" fill="#fff" />
+        <circle cx="14.5" cy="21.5" r="2.6" fill="#2b1a3d" />
+        <circle cx="26.5" cy="21.5" r="2.6" fill="#2b1a3d" />
+        <circle cx="15.5" cy="19.5" r="0.8" fill="#fff" />
+        <circle cx="27.5" cy="19.5" r="0.8" fill="#fff" />
+      </g>
+      <!-- pico -->
+      <path d="M18 25.5 L22 25.5 L20 29 Z" fill="#e8863f" />
+    </svg>
+  </button>
+
+  <div class="vera-panel" id="vera-panel">
+    <div class="vera-header">
+      <div class="vera-header-info">
+        <span class="vera-avatar">
+          <svg viewBox="0 0 40 40" class="vera-svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="veraGradHead" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="var(--gold-bright)" />
+                <stop offset="100%" stop-color="var(--gold)" />
+              </linearGradient>
+            </defs>
+            <path d="M10 15 L13 3 L17 13 Z" fill="url(#veraGradHead)" />
+            <path d="M30 15 L27 3 L23 13 Z" fill="url(#veraGradHead)" />
+            <circle cx="20" cy="23" r="13" fill="url(#veraGradHead)" />
+            <ellipse cx="20" cy="29.5" rx="6" ry="4.5" fill="#fff" opacity="0.25" />
+            <g class="vera-eyes">
+              <circle cx="14" cy="21" r="5.2" fill="#fff" />
+              <circle cx="26" cy="21" r="5.2" fill="#fff" />
+              <circle cx="14.5" cy="21.5" r="2.6" fill="#2b1a3d" />
+              <circle cx="26.5" cy="21.5" r="2.6" fill="#2b1a3d" />
+              <circle cx="15.5" cy="19.5" r="0.8" fill="#fff" />
+              <circle cx="27.5" cy="19.5" r="0.8" fill="#fff" />
+            </g>
+            <path d="M18 25.5 L22 25.5 L20 29 Z" fill="#e8863f" />
+          </svg>
+        </span>
+        <div>
+          <span class="vera-name">Selian</span>
+          <span class="vera-tag" data-i18n="selianTag">Asistente del glosario</span>
+        </div>
+      </div>
+      <button class="close-btn" id="vera-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="vera-messages" id="vera-messages"></div>
+    <form class="vera-input-row" id="vera-form">
+      <input type="text" id="vera-input" data-i18n-placeholder="selianPlaceholder" placeholder="Pregúntame algo del glosario…" autocomplete="off" />
+      <button type="submit" class="vera-send" aria-label="Enviar">➤</button>
+    </form>
+  </div>
+
+  <script define:vars={{ glossaryData: glossaryRaw }}>
+    const glossary = glossaryData;
+
+    // ── I18N: diccionario de traducciones de la interfaz ─────────────
+    const I18N = {
+      es: {
+        subtitle: 'Estadístico Trilingüe',
+        searchPlaceholder: 'Buscar en inglés, español o francés…',
+        filterAll: 'Todos', filterDesc: 'Descriptiva', filterInf: 'Inferencial', filterPhrases: 'Frases',
+        actionQuiz: '✦ Autoevaluación', actionStats: '📊 Estadísticas', actionAdd: '➕ Agregar término',
+        creditPrefix: 'Realizado por',
+        welcomeTitle: 'Selecciona un término',
+        welcomeSub: 'Elige una entrada del glosario para ver su ficha terminológica completa en los tres idiomas.',
+        termCount: (v, t) => `Mostrando ${v} de ${t} entradas`,
+        campoDesc: 'DESCRIPTIVA', campoInf: 'INFERENCIAL', campoFrase: 'FRASE TÉCNICA',
+        nivelPrefix: 'Nivel', contextoLabel: 'Contexto de uso', fuentePrefix: 'Fuente',
+        langNames: { en: 'inglés', es: 'español', fr: 'francés' },
+        quizQuestionOf: (i, t, l) => `Pregunta ${i} de ${t} · en ${l}`,
+        quizQuestion: '¿Cuál es la definición correcta?',
+        quizScore: 'Puntaje', quizExit: 'Salir', quizResult: 'Resultado',
+        quizCorrect: 'respuestas correctas', quizRepeat: 'Repetir', quizClose: 'Cerrar',
+        statsTitle: 'Estadísticas del glosario',
+        statsSub: 'Panel inspirado en la funcionalidad de estadísticas del prototipo Java del proyecto.',
+        statTotal: 'Total entradas', statWords: 'Palabras', statPhrases: 'Frases', statDesc: 'Descriptiva', statInf: 'Inferencial',
+        statsByField: 'Distribución por campo estadístico',
+        statsByType: 'Distribución por tipo de entrada',
+        statsByGram: 'Distribución por categoría gramatical',
+        statsProportion: 'Proporción Descriptiva vs. Inferencial',
+        colField: 'Campo', colQty: 'Cantidad', colPct: 'Porcentaje', colType: 'Tipo', colCat: 'Categoría',
+        rowWord: 'Palabra', rowPhrase: 'Frase',
+        addTitle: 'Agregar nuevo término',
+        addSub: 'Se agrega solo a tu navegador (no se sube al glosario público). Ideal para practicar o anotar términos propios.',
+        addSectionEs: '— Español', addSectionEn: '— English', addSectionFr: '— Français',
+        addTermEs: 'Término (ES) *', addDefEs: 'Definición (ES) *',
+        addGram: 'Categoría gramatical', addSymbol: 'Símbolo',
+        addField: 'Campo', addFieldDesc: 'Descriptiva', addFieldInf: 'Inferencial', addFieldPhrase: 'Frase técnica',
+        addTermEn: 'Term (EN)', addDefEn: 'Definition (EN)',
+        addTermFr: 'Terme (FR)', addDefFr: 'Définition (FR)',
+        addSave: 'Guardar término', addClear: 'Limpiar',
+        addErrorRequired: 'El término y la definición en español son obligatorios.',
+        addSuccess: (t) => `✓ Término "${t}" agregado correctamente.`,
+        selianTag: 'Asistente del glosario', selianPlaceholder: 'Pregúntame algo del glosario…',
+        selianGreetPanel: '¡Hola! Soy <strong>Selian</strong>, tu asistente del glosario 📊 Pregúntame por un término, pide "estadísticas", "quiz" o escribe <em>ayuda</em>.',
+        selianOpenStats: 'Te abro el panel completo…',
+      },
+      en: {
+        subtitle: 'Trilingual Statistics',
+        searchPlaceholder: 'Search in English, Spanish or French…',
+        filterAll: 'All', filterDesc: 'Descriptive', filterInf: 'Inferential', filterPhrases: 'Phrases',
+        actionQuiz: '✦ Self-quiz', actionStats: '📊 Statistics', actionAdd: '➕ Add term',
+        creditPrefix: 'Made by',
+        welcomeTitle: 'Select a term',
+        welcomeSub: 'Choose an entry from the glossary to see its full terminological record in all three languages.',
+        termCount: (v, t) => `Showing ${v} of ${t} entries`,
+        campoDesc: 'DESCRIPTIVE', campoInf: 'INFERENTIAL', campoFrase: 'TECHNICAL PHRASE',
+        nivelPrefix: 'Level', contextoLabel: 'Usage context', fuentePrefix: 'Source',
+        langNames: { en: 'English', es: 'Spanish', fr: 'French' },
+        quizQuestionOf: (i, t, l) => `Question ${i} of ${t} · in ${l}`,
+        quizQuestion: 'Which is the correct definition?',
+        quizScore: 'Score', quizExit: 'Exit', quizResult: 'Result',
+        quizCorrect: 'correct answers', quizRepeat: 'Retry', quizClose: 'Close',
+        statsTitle: 'Glossary statistics',
+        statsSub: 'Panel inspired by the statistics feature from the project\'s Java prototype.',
+        statTotal: 'Total entries', statWords: 'Words', statPhrases: 'Phrases', statDesc: 'Descriptive', statInf: 'Inferential',
+        statsByField: 'Distribution by statistical field',
+        statsByType: 'Distribution by entry type',
+        statsByGram: 'Distribution by grammatical category',
+        statsProportion: 'Descriptive vs. Inferential proportion',
+        colField: 'Field', colQty: 'Count', colPct: 'Percentage', colType: 'Type', colCat: 'Category',
+        rowWord: 'Word', rowPhrase: 'Phrase',
+        addTitle: 'Add new term',
+        addSub: 'Only saved in your browser (not uploaded to the public glossary). Great for practicing or noting your own terms.',
+        addSectionEs: '— Español', addSectionEn: '— English', addSectionFr: '— Français',
+        addTermEs: 'Term (ES) *', addDefEs: 'Definition (ES) *',
+        addGram: 'Grammatical category', addSymbol: 'Symbol',
+        addField: 'Field', addFieldDesc: 'Descriptive', addFieldInf: 'Inferential', addFieldPhrase: 'Technical phrase',
+        addTermEn: 'Term (EN)', addDefEn: 'Definition (EN)',
+        addTermFr: 'Terme (FR)', addDefFr: 'Définition (FR)',
+        addSave: 'Save term', addClear: 'Clear',
+        addErrorRequired: 'The Spanish term and definition are required.',
+        addSuccess: (t) => `✓ Term "${t}" added successfully.`,
+        selianTag: 'Glossary assistant', selianPlaceholder: 'Ask me something about the glossary…',
+        selianGreetPanel: 'Hi! I\'m <strong>Selian</strong>, your glossary assistant 📊 Ask me for a term, say "statistics", "quiz" or type <em>help</em>.',
+        selianOpenStats: 'Opening the full panel…',
+      },
+      fr: {
+        subtitle: 'Statistiques trilingues',
+        searchPlaceholder: 'Rechercher en anglais, espagnol ou français…',
+        filterAll: 'Tous', filterDesc: 'Descriptive', filterInf: 'Inférentielle', filterPhrases: 'Phrases',
+        actionQuiz: '✦ Auto-évaluation', actionStats: '📊 Statistiques', actionAdd: '➕ Ajouter un terme',
+        creditPrefix: 'Réalisé par',
+        welcomeTitle: 'Sélectionnez un terme',
+        welcomeSub: 'Choisissez une entrée du glossaire pour voir sa fiche terminologique complète dans les trois langues.',
+        termCount: (v, t) => `${v} sur ${t} entrées affichées`,
+        campoDesc: 'DESCRIPTIVE', campoInf: 'INFÉRENTIELLE', campoFrase: 'EXPRESSION TECHNIQUE',
+        nivelPrefix: 'Niveau', contextoLabel: "Contexte d'usage", fuentePrefix: 'Source',
+        langNames: { en: 'anglais', es: 'espagnol', fr: 'français' },
+        quizQuestionOf: (i, t, l) => `Question ${i} sur ${t} · en ${l}`,
+        quizQuestion: 'Quelle est la bonne définition ?',
+        quizScore: 'Score', quizExit: 'Quitter', quizResult: 'Résultat',
+        quizCorrect: 'bonnes réponses', quizRepeat: 'Recommencer', quizClose: 'Fermer',
+        statsTitle: 'Statistiques du glossaire',
+        statsSub: 'Panneau inspiré de la fonctionnalité statistique du prototype Java du projet.',
+        statTotal: 'Entrées au total', statWords: 'Mots', statPhrases: 'Expressions', statDesc: 'Descriptive', statInf: 'Inférentielle',
+        statsByField: 'Répartition par domaine statistique',
+        statsByType: "Répartition par type d'entrée",
+        statsByGram: 'Répartition par catégorie grammaticale',
+        statsProportion: 'Proportion Descriptive vs. Inférentielle',
+        colField: 'Domaine', colQty: 'Nombre', colPct: 'Pourcentage', colType: 'Type', colCat: 'Catégorie',
+        rowWord: 'Mot', rowPhrase: 'Expression',
+        addTitle: 'Ajouter un nouveau terme',
+        addSub: "Enregistré uniquement dans votre navigateur (non publié dans le glossaire public). Idéal pour s'exercer ou noter ses propres termes.",
+        addSectionEs: '— Español', addSectionEn: '— English', addSectionFr: '— Français',
+        addTermEs: 'Terme (ES) *', addDefEs: 'Définition (ES) *',
+        addGram: 'Catégorie grammaticale', addSymbol: 'Symbole',
+        addField: 'Domaine', addFieldDesc: 'Descriptive', addFieldInf: 'Inférentielle', addFieldPhrase: 'Expression technique',
+        addTermEn: 'Term (EN)', addDefEn: 'Definition (EN)',
+        addTermFr: 'Terme (FR)', addDefFr: 'Définition (FR)',
+        addSave: 'Enregistrer le terme', addClear: 'Effacer',
+        addErrorRequired: 'Le terme et la définition en espagnol sont obligatoires.',
+        addSuccess: (t) => `✓ Terme « ${t} » ajouté avec succès.`,
+        selianTag: 'Assistante du glossaire', selianPlaceholder: 'Demandez-moi quelque chose sur le glossaire…',
+        selianGreetPanel: 'Salut ! Je suis <strong>Selian</strong>, votre assistante du glossaire 📊 Demandez-moi un terme, dites « statistiques », « quiz » ou tapez <em>aide</em>.',
+        selianOpenStats: "J'ouvre le panneau complet…",
+      },
+    };
+
+    let currentLang = 'es';
+    try { currentLang = localStorage.getItem('glosario-ui-lang') || 'es'; } catch (e) {}
+
+    function t(key) {
+      return (I18N[currentLang] && I18N[currentLang][key] !== undefined) ? I18N[currentLang][key] : I18N.es[key];
+    }
+
+    function applyI18n() {
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        const val = t(key);
+        if (typeof val === 'string') el.textContent = val;
+      });
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.dataset.i18nPlaceholder;
+        const val = t(key);
+        if (typeof val === 'string') el.placeholder = val;
+      });
+      document.documentElement.lang = currentLang;
+    }
 
     const searchInput = document.getElementById('search-input');
     const termList = document.getElementById('term-list');
     const termCount = document.getElementById('term-count');
     const welcomeState = document.getElementById('welcome-state');
     const entryView = document.getElementById('entry-view');
+    const statsView = document.getElementById('stats-view');
     const filterBtns = document.querySelectorAll('.filter-btn');
-    const termItems = document.querySelectorAll('.term-item');
 
     let activeFilter = 'all';
+    let currentEntryIndex = null;
 
     function normalizeStr(str) {
       return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function badgeFor(campo) {
+      if (campo === 'Descriptive Statistics') return { cls: 'badge-desc', label: 'DESC' };
+      if (campo === 'Inferential Statistics') return { cls: 'badge-inf', label: 'INF' };
+      return { cls: 'badge-frase', label: 'FRASE' };
+    }
+
+    // ── RENDER SIDEBAR LIST (permite agregar términos en vivo) ──────
+    function renderTermList() {
+      termList.innerHTML = '';
+      glossary.forEach((term, i) => {
+        const b = badgeFor(term.campo);
+        const btn = document.createElement('button');
+        btn.className = 'term-item';
+        btn.dataset.index = String(i);
+        btn.dataset.en = term.term_en.toLowerCase();
+        btn.dataset.es = term.term_es.toLowerCase();
+        btn.dataset.fr = term.term_fr.toLowerCase();
+        btn.dataset.campo = term.campo;
+        btn.innerHTML = `
+          <span class="term-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="term-label">${term.term_en}</span>
+          <span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+          <span class="term-label term-label-es">${term.term_es}</span>
+          <span class="term-sep" style="color:rgba(255,255,255,0.2)">·</span>
+          <span class="term-label term-label-fr">${term.term_fr}</span>
+          <span class="term-badge ${b.cls}">${b.label}</span>
+        `;
+        btn.addEventListener('click', () => showEntry(i));
+        termList.appendChild(btn);
+      });
+      filterTerms();
     }
 
     function filterTerms() {
       const query = normalizeStr(searchInput.value.trim());
       let visible = 0;
       let total = 0;
+      const items = termList.querySelectorAll('.term-item');
 
-      termItems.forEach(item => {
+      items.forEach(item => {
         const campo = item.dataset.campo;
         const matchesFilter = activeFilter === 'all' || campo === activeFilter;
         if (matchesFilter) total++;
@@ -177,7 +466,7 @@ import glossaryRaw from '../data/glossary.json';
         }
       });
 
-      termCount.textContent = `Mostrando ${visible} de ${total} entradas`;
+      termCount.textContent = t('termCount')(visible, total);
     }
 
     function safeHostname(url) {
@@ -185,9 +474,11 @@ import glossaryRaw from '../data/glossary.json';
     }
 
     function showEntry(index) {
+      currentEntryIndex = index;
       const term = glossary[index];
+      const esFrase = term.tipo === 'Frase';
 
-      termItems.forEach(item => item.classList.remove('active'));
+      document.querySelectorAll('.term-item').forEach(item => item.classList.remove('active'));
       const activeItem = termList.querySelector(`[data-index="${index}"]`);
       if (activeItem) activeItem.classList.add('active');
 
@@ -198,35 +489,56 @@ import glossaryRaw from '../data/glossary.json';
       document.getElementById('entry-symbol').textContent = term.simbolo;
 
       const campoEl = document.getElementById('entry-campo');
-      campoEl.textContent = term.campo === 'Descriptive Statistics' ? 'DESCRIPTIVA' : 'INFERENCIAL';
-      campoEl.className = 'tag-campo ' + (term.campo === 'Descriptive Statistics' ? 'campo-desc' : 'campo-inf');
+      const campoLabel = term.campo === 'Descriptive Statistics' ? t('campoDesc')
+        : term.campo === 'Inferential Statistics' ? t('campoInf') : t('campoFrase');
+      const campoClass = term.campo === 'Descriptive Statistics' ? 'campo-desc'
+        : term.campo === 'Inferential Statistics' ? 'campo-inf' : 'campo-frase';
+      campoEl.textContent = campoLabel;
+      campoEl.className = 'tag-campo ' + campoClass;
 
-      const langs = [
-        { key: 'en', label: 'ENGLISH' },
-        { key: 'es', label: 'ESPAÑOL' },
-        { key: 'fr', label: 'FRANÇAIS' },
-      ];
+      const nivelEl = document.getElementById('entry-nivel');
+      if (esFrase && term.nivel) {
+        nivelEl.textContent = t('nivelPrefix') + ': ' + term.nivel;
+        nivelEl.style.display = '';
+      } else {
+        nivelEl.style.display = 'none';
+      }
 
-      langs.forEach(({ key }) => {
+      const contextoEl = document.getElementById('entry-contexto');
+      if (esFrase && term.contexto_es) {
+        contextoEl.innerHTML = `<strong>${t('contextoLabel')}:</strong> ${term.contexto_es}`;
+        contextoEl.style.display = '';
+      } else {
+        contextoEl.style.display = 'none';
+      }
+
+      const langs = ['en', 'es', 'fr'];
+      const labelDef = { en: 'DEFINITION', es: 'DEFINICIÓN', fr: 'DÉFINITION' };
+      const labelFrase = { en: 'MEANING / CONTEXT', es: 'SIGNIFICADO / CONTEXTO', fr: 'SENS / CONTEXTE' };
+
+      langs.forEach((key) => {
         document.getElementById(`card-term-${key}`).textContent = term[`term_${key}`];
         document.getElementById(`card-gram-${key}`).textContent = term[`gram_${key}`];
-        document.getElementById(`card-phonetic-${key}`).textContent = term[`fon_${key}`];
+        document.getElementById(`card-phonetic-${key}`).textContent = term[`fon_${key}`] || '—';
+        document.getElementById(`card-label-${key}`).textContent = esFrase ? labelFrase[key] : labelDef[key];
         document.getElementById(`card-def-${key}`).textContent = term[`def_${key}`];
         const src = document.getElementById(`card-source-${key}`);
-        src.textContent = 'Fuente: ' + safeHostname(term[`fuente_def_${key}`]);
-        src.href = term[`fuente_def_${key}`];
+        if (term[`fuente_def_${key}`]) {
+          src.textContent = t('fuentePrefix') + ': ' + safeHostname(term[`fuente_def_${key}`]);
+          src.href = term[`fuente_def_${key}`];
+          src.style.display = '';
+        } else {
+          src.style.display = 'none';
+        }
       });
 
       welcomeState.style.display = 'none';
+      statsView.style.display = 'none';
       entryView.style.display = 'block';
       entryView.classList.remove('fade-in');
       void entryView.offsetWidth;
       entryView.classList.add('fade-in');
     }
-
-    termItems.forEach(item => {
-      item.addEventListener('click', () => showEntry(parseInt(item.dataset.index)));
-    });
 
     searchInput.addEventListener('input', filterTerms);
 
@@ -238,6 +550,561 @@ import glossaryRaw from '../data/glossary.json';
         filterTerms();
       });
     });
+
+    // ── PRONUNCIACIÓN (Web Speech API) ──────────────
+    let cachedVoices = [];
+    function refreshVoices() {
+      if ('speechSynthesis' in window) cachedVoices = window.speechSynthesis.getVoices();
+    }
+    if ('speechSynthesis' in window) {
+      refreshVoices();
+      window.speechSynthesis.onvoiceschanged = refreshVoices;
+    }
+
+    function pickVoice(langCode) {
+      if (!cachedVoices.length) refreshVoices();
+      const base = langCode.split('-')[0];
+      return (
+        cachedVoices.find(v => v.lang.toLowerCase() === langCode.toLowerCase()) ||
+        cachedVoices.find(v => v.lang.toLowerCase().startsWith(base)) ||
+        null
+      );
+    }
+
+    function speakTerm(text, langCode) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = langCode;
+      const voice = pickVoice(langCode);
+      if (voice) utter.voice = voice;
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+
+    document.querySelectorAll('.play-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const lang = btn.dataset.lang;
+        const voice = btn.dataset.voice;
+        const termEl = document.getElementById(`card-term-${lang}`);
+        if (termEl && termEl.textContent) speakTerm(termEl.textContent, voice);
+      });
+    });
+
+    // ── MODO OSCURO ──────────────────────────────────
+    const themeToggle = document.getElementById('theme-toggle');
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+      try { localStorage.setItem('glosario-theme', theme); } catch (e) {}
+    }
+    let savedTheme = 'light';
+    try { savedTheme = localStorage.getItem('glosario-theme') || 'light'; } catch (e) {}
+    applyTheme(savedTheme);
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // ── MODO AUTOEVALUACIÓN ──────────────────────────
+    const quizOverlay = document.getElementById('quiz-overlay');
+    const quizCard = document.getElementById('quiz-card');
+    const quizStartBtn = document.getElementById('quiz-start');
+    let quizPool = [];
+    let quizIndex = 0;
+    let quizScore = 0;
+    let quizAnswered = false;
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function startQuiz() {
+      quizPool = shuffle(glossary).slice(0, Math.min(10, glossary.length));
+      quizIndex = 0;
+      quizScore = 0;
+      quizOverlay.classList.add('open');
+      renderQuiz();
+    }
+
+    function closeQuiz() {
+      quizOverlay.classList.remove('open');
+      window.speechSynthesis && window.speechSynthesis.cancel();
+    }
+
+    function renderQuiz() {
+      if (quizIndex >= quizPool.length) {
+        quizCard.innerHTML = `
+          <p class="quiz-eyebrow">${t('quizResult')}</p>
+          <p class="quiz-result">${quizScore} / ${quizPool.length}</p>
+          <p class="quiz-sub">${t('quizCorrect')}</p>
+          <div class="quiz-footer" style="justify-content:center;">
+            <button class="quiz-btn-outline" id="quiz-repeat">${t('quizRepeat')}</button>
+            <button class="quiz-btn-outline" id="quiz-close-2">${t('quizClose')}</button>
+          </div>
+        `;
+        document.getElementById('quiz-repeat').addEventListener('click', startQuiz);
+        document.getElementById('quiz-close-2').addEventListener('click', closeQuiz);
+        return;
+      }
+      quizAnswered = false;
+      const entry = quizPool[quizIndex];
+      const lang = ['en', 'es', 'fr'][Math.floor(Math.random() * 3)];
+      const correctDef = entry[`def_${lang}`];
+      const distractors = shuffle(glossary.filter(e => e.term_en !== entry.term_en))
+        .slice(0, 3)
+        .map(e => e[`def_${lang}`]);
+      const options = shuffle([correctDef, ...distractors]);
+
+      quizCard.innerHTML = `
+        <p class="quiz-eyebrow">${t('quizQuestionOf')(quizIndex + 1, quizPool.length, t('langNames')[lang])}</p>
+        <p class="quiz-result quiz-term-display">${entry[`term_${lang}`]}</p>
+        <p class="quiz-sub">${t('quizQuestion')}</p>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="quiz-footer">
+          <span class="quiz-score">${t('quizScore')}: ${quizScore}</span>
+          <button class="quiz-btn-outline" id="quiz-exit">${t('quizExit')}</button>
+        </div>
+      `;
+      document.getElementById('quiz-exit').addEventListener('click', closeQuiz);
+      const optContainer = document.getElementById('quiz-options');
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt';
+        btn.textContent = opt;
+        btn.addEventListener('click', () => {
+          if (quizAnswered) return;
+          quizAnswered = true;
+          const isCorrect = opt === correctDef;
+          btn.classList.add(isCorrect ? 'correct' : 'wrong');
+          if (isCorrect) quizScore++;
+          else {
+            [...optContainer.children].forEach(c => {
+              if (c.textContent === correctDef) c.classList.add('correct');
+            });
+          }
+          setTimeout(() => { quizIndex++; renderQuiz(); }, 1100);
+        });
+        optContainer.appendChild(btn);
+      });
+    }
+
+    quizStartBtn.addEventListener('click', startQuiz);
+    quizOverlay.addEventListener('click', (e) => {
+      if (e.target.id === 'quiz-overlay') closeQuiz();
+    });
+
+    // ── ESTADÍSTICAS (panel tipo dashboard, del prototipo Java) ──────
+    const statsStartBtn = document.getElementById('stats-start');
+
+    function computeStats() {
+      const total = glossary.length;
+      const palabras = glossary.filter(t => t.tipo !== 'Frase');
+      const frases = glossary.filter(t => t.tipo === 'Frase');
+      const desc = palabras.filter(t => t.campo === 'Descriptive Statistics').length;
+      const inf = palabras.filter(t => t.campo === 'Inferential Statistics').length;
+
+      const porCategoria = {};
+      glossary.forEach(t => {
+        const cat = (t.gram_es || '').split(/[,/]/)[0].trim() || '—';
+        porCategoria[cat] = (porCategoria[cat] || 0) + 1;
+      });
+
+      return { total, nPalabras: palabras.length, nFrases: frases.length, desc, inf, porCategoria };
+    }
+
+    function pct(n, d) { return d === 0 ? '0.0%' : (n * 100 / d).toFixed(1) + '%'; }
+
+    function renderStats() {
+      const s = computeStats();
+      const catRows = Object.entries(s.porCategoria)
+        .sort((a, b) => b[1] - a[1])
+        .map(([cat, n]) => `<tr><td>${cat}</td><td>${n}</td></tr>`).join('');
+
+      statsView.innerHTML = `
+        <div class="stats-header">
+          <h2>${t('statsTitle')}</h2>
+          <p class="stats-sub">${t('statsSub')}</p>
+        </div>
+
+        <div class="stats-cards">
+          <div class="stat-card"><span class="stat-n">${s.total}</span><span class="stat-l">${t('statTotal')}</span></div>
+          <div class="stat-card stat-c-green"><span class="stat-n">${s.nPalabras}</span><span class="stat-l">${t('statWords')}</span></div>
+          <div class="stat-card stat-c-amber"><span class="stat-n">${s.nFrases}</span><span class="stat-l">${t('statPhrases')}</span></div>
+          <div class="stat-card stat-c-blue"><span class="stat-n">${s.desc}</span><span class="stat-l">${t('statDesc')}</span></div>
+          <div class="stat-card stat-c-purple"><span class="stat-n">${s.inf}</span><span class="stat-l">${t('statInf')}</span></div>
+        </div>
+
+        <h3 class="stats-subtitle">${t('statsByField')}</h3>
+        <table class="stats-table">
+          <thead><tr><th>${t('colField')}</th><th>${t('colQty')}</th><th>${t('colPct')}</th></tr></thead>
+          <tbody>
+            <tr><td>${t('statDesc')}</td><td>${s.desc}</td><td>${pct(s.desc, s.nPalabras)}</td></tr>
+            <tr><td>${t('statInf')}</td><td>${s.inf}</td><td>${pct(s.inf, s.nPalabras)}</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="stats-subtitle">${t('statsByType')}</h3>
+        <table class="stats-table">
+          <thead><tr><th>${t('colType')}</th><th>${t('colQty')}</th><th>${t('colPct')}</th></tr></thead>
+          <tbody>
+            <tr><td>${t('rowWord')}</td><td>${s.nPalabras}</td><td>${pct(s.nPalabras, s.total)}</td></tr>
+            <tr><td>${t('rowPhrase')}</td><td>${s.nFrases}</td><td>${pct(s.nFrases, s.total)}</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="stats-subtitle">${t('statsByGram')}</h3>
+        <table class="stats-table">
+          <thead><tr><th>${t('colCat')}</th><th>${t('colQty')}</th></tr></thead>
+          <tbody>${catRows}</tbody>
+        </table>
+
+        <h3 class="stats-subtitle">${t('statsProportion')}</h3>
+        <div class="stats-bar">
+          <div class="stats-bar-desc" style="width:${s.nPalabras ? (s.desc * 100 / s.nPalabras) : 0}%">${s.desc ? t('statDesc') + ' ' + s.desc : ''}</div>
+          <div class="stats-bar-inf" style="width:${s.nPalabras ? (s.inf * 100 / s.nPalabras) : 0}%">${s.inf ? t('statInf') + ' ' + s.inf : ''}</div>
+        </div>
+      `;
+    }
+
+    statsStartBtn.addEventListener('click', () => {
+      welcomeState.style.display = 'none';
+      entryView.style.display = 'none';
+      statsView.style.display = 'block';
+      renderStats();
+      document.querySelectorAll('.term-item').forEach(item => item.classList.remove('active'));
+    });
+
+    // ── AGREGAR TÉRMINO (formulario, del prototipo Java) ─────────────
+    const addOverlay = document.getElementById('add-overlay');
+    const addCard = document.getElementById('add-card');
+    const addStartBtn = document.getElementById('add-start');
+    const STORAGE_KEY = 'glosario-terminos-agregados';
+
+    function loadStoredTerms() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const stored = JSON.parse(raw);
+        stored.forEach(t => glossary.push(t));
+      } catch (e) {}
+    }
+
+    function persistAddedTerms() {
+      try {
+        const original = glossaryData.length;
+        const added = glossary.slice(original);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(added));
+      } catch (e) {}
+    }
+
+    function renderAddForm(msg) {
+      addCard.innerHTML = `
+        <div class="add-header">
+          <h2>${t('addTitle')}</h2>
+          <button class="close-btn" id="add-close" aria-label="Cerrar">✕</button>
+        </div>
+        <p class="add-sub">${t('addSub')}</p>
+        <form id="add-form" class="add-form">
+          <div class="add-section-label">${t('addSectionEs')}</div>
+          <label>${t('addTermEs')}<input required name="term_es" type="text"></label>
+          <label>${t('addDefEs')}<textarea required name="def_es" rows="2"></textarea></label>
+          <div class="add-row-2">
+            <label>${t('addGram')}<input name="gram_es" type="text" placeholder="sustantivo femenino (s.f.)"></label>
+            <label>${t('addSymbol')}<input name="simbolo" type="text" placeholder="σ, x̄, p…"></label>
+          </div>
+          <label>${t('addField')}
+            <select name="campo">
+              <option value="Descriptive Statistics">${t('addFieldDesc')}</option>
+              <option value="Inferential Statistics">${t('addFieldInf')}</option>
+              <option value="Technical Phrases">${t('addFieldPhrase')}</option>
+            </select>
+          </label>
+
+          <div class="add-section-label">${t('addSectionEn')}</div>
+          <label>${t('addTermEn')}<input name="term_en" type="text"></label>
+          <label>${t('addDefEn')}<textarea name="def_en" rows="2"></textarea></label>
+
+          <div class="add-section-label">${t('addSectionFr')}</div>
+          <label>${t('addTermFr')}<input name="term_fr" type="text"></label>
+          <label>${t('addDefFr')}<textarea name="def_fr" rows="2"></textarea></label>
+
+          <p class="add-error" id="add-error"></p>
+          <p class="add-ok" id="add-ok">${msg || ''}</p>
+          <div class="add-actions">
+            <button type="submit" class="action-btn action-btn-gold">${t('addSave')}</button>
+            <button type="button" class="action-btn action-btn-outline" id="add-clear">${t('addClear')}</button>
+          </div>
+        </form>
+      `;
+      document.getElementById('add-close').addEventListener('click', closeAdd);
+      document.getElementById('add-clear').addEventListener('click', () => renderAddForm());
+
+      document.getElementById('add-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.target);
+        const termEs = (fd.get('term_es') || '').trim();
+        const defEs = (fd.get('def_es') || '').trim();
+        const errorEl = document.getElementById('add-error');
+        if (!termEs || !defEs) {
+          errorEl.textContent = t('addErrorRequired');
+          return;
+        }
+        errorEl.textContent = '';
+
+        const nuevo = {
+          term_en: (fd.get('term_en') || '').trim() || '—',
+          term_es: termEs,
+          term_fr: (fd.get('term_fr') || '').trim() || '—',
+          campo: fd.get('campo'),
+          simbolo: (fd.get('simbolo') || '').trim() || '—',
+          tipo: fd.get('campo') === 'Technical Phrases' ? 'Frase' : 'Palabra',
+          gram_en: '', gram_es: (fd.get('gram_es') || '').trim() || '—', gram_fr: '',
+          def_en: (fd.get('def_en') || '').trim() || '—',
+          def_es: defEs,
+          def_fr: (fd.get('def_fr') || '').trim() || '—',
+          fuente_def_en: '', fuente_def_es: '', fuente_def_fr: '',
+          fon_en: '', fon_es: '', fon_fr: '',
+          fuente_fon_en: '', fuente_fon_es: '', fuente_fon_fr: '',
+          comentario: 'Agregado manualmente por el usuario.'
+        };
+
+        glossary.push(nuevo);
+        persistAddedTerms();
+        renderTermList();
+        renderAddForm(t('addSuccess')(termEs));
+      });
+    }
+
+    function openAdd() {
+      renderAddForm();
+      addOverlay.classList.add('open');
+    }
+    function closeAdd() {
+      addOverlay.classList.remove('open');
+    }
+
+    addStartBtn.addEventListener('click', openAdd);
+    addOverlay.addEventListener('click', (e) => {
+      if (e.target.id === 'add-overlay') closeAdd();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeQuiz(); closeAdd(); }
+    });
+
+    // ── VERA: ASISTENTE VIRTUAL SIMULADA (sin IA, sin API) ───────────
+    const veraFab = document.getElementById('vera-fab');
+    const veraPanel = document.getElementById('vera-panel');
+    const veraClose = document.getElementById('vera-close');
+    const veraMessages = document.getElementById('vera-messages');
+    const veraForm = document.getElementById('vera-form');
+    const veraInput = document.getElementById('vera-input');
+
+    function veraNorm(str) {
+      return (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function veraFindTerm(query) {
+      const q = veraNorm(query);
+      if (!q) return null;
+      return glossary.find(t =>
+        veraNorm(t.term_es) === q || veraNorm(t.term_en) === q || veraNorm(t.term_fr) === q
+      ) || glossary.find(t =>
+        veraNorm(t.term_es).includes(q) || veraNorm(t.term_en).includes(q) || veraNorm(t.term_fr).includes(q) ||
+        q.includes(veraNorm(t.term_es)) || q.includes(veraNorm(t.term_en))
+      ) || null;
+    }
+
+    function veraFindAllMatches(query) {
+      const q = veraNorm(query);
+      return glossary.filter(t =>
+        veraNorm(t.term_es).includes(q) || veraNorm(t.term_en).includes(q) || veraNorm(t.term_fr).includes(q) ||
+        veraNorm(t.def_es || '').includes(q)
+      ).slice(0, 5);
+    }
+
+    function veraAddMessage(who, html) {
+      const div = document.createElement('div');
+      div.className = 'vera-msg vera-msg-' + who;
+      div.innerHTML = html;
+      veraMessages.appendChild(div);
+      veraMessages.scrollTop = veraMessages.scrollHeight;
+    }
+
+    function veraSuggestionRow(matches) {
+      if (!matches.length) return '';
+      const chips = matches.map((t, idx) => {
+        const realIndex = glossary.indexOf(t);
+        return `<button class="vera-chip" data-goto="${realIndex}">${t.term_es}</button>`;
+      }).join('');
+      return `<div class="vera-chips">${chips}</div>`;
+    }
+
+    function veraRespond(rawText) {
+      const text = veraNorm(rawText);
+
+      // Saludo
+      if (/^(hola|buenas|hey|hi|ola)\b/.test(text)) {
+        return `¡Hola! Soy Selian 👋 Puedo ayudarte a encontrar términos, explicarte su significado, darte estadísticas del glosario o lanzarte el quiz. Prueba con algo como "¿qué es la varianza?" o escribe <em>ayuda</em>.`;
+      }
+
+      // Ayuda
+      if (/ayuda|help|que puedes hacer|comandos/.test(text)) {
+        return `Puedo con esto:<br>
+          • <strong>"¿qué es [término]?"</strong> — te doy la definición en los 3 idiomas<br>
+          • <strong>"término aleatorio"</strong> — te sorprendo con uno<br>
+          • <strong>"diferencia entre X y Y"</strong> — comparo dos términos<br>
+          • <strong>"estadísticas"</strong> — te resumo el glosario<br>
+          • <strong>"quiz"</strong> — te llevo al modo autoevaluación`;
+      }
+
+      // Estadísticas
+      if (/estadistica|cuantos terminos|cuantas entradas/.test(text)) {
+        const s = computeStats();
+        setTimeout(() => {
+          statsStartBtn.click();
+        }, 400);
+        return `El glosario tiene <strong>${s.total}</strong> entradas: ${s.nPalabras} palabras y ${s.nFrases} frases técnicas (${s.desc} de estadística descriptiva, ${s.inf} inferencial). ${t('selianOpenStats')}`;
+      }
+
+      // Quiz
+      if (/quiz|autoevaluacion|examen|practicar/.test(text)) {
+        setTimeout(() => quizStartBtn.click(), 400);
+        return `¡Vamos! Te abro el modo autoevaluación 🎯`;
+      }
+
+      // Término aleatorio
+      if (/aleatorio|random|sorprend|cualquiera/.test(text)) {
+        const foundTerm = glossary[Math.floor(Math.random() * glossary.length)];
+        const idx = glossary.indexOf(foundTerm);
+        setTimeout(() => showEntry(idx), 300);
+        return `Te propongo <strong>${foundTerm.term_es}</strong> (${foundTerm.term_en} / ${foundTerm.term_fr}): ${foundTerm[`def_${currentLang}`] || foundTerm.def_es}`;
+      }
+
+      // Diferencia entre X y Y
+      const diffMatch = rawText.match(/diferencia entre (.+?) y (.+)/i);
+      if (diffMatch) {
+        const a = veraFindTerm(diffMatch[1]);
+        const b = veraFindTerm(diffMatch[2]);
+        if (a && b) {
+          return `<strong>${a.term_es}:</strong> ${a[`def_${currentLang}`] || a.def_es}<br><br><strong>${b.term_es}:</strong> ${b[`def_${currentLang}`] || b.def_es}`;
+        }
+        if (!a) return `No encontré "${diffMatch[1].trim()}" en el glosario. ¿Puedes revisar cómo lo escribiste?`;
+        if (!b) return `No encontré "${diffMatch[2].trim()}" en el glosario. ¿Puedes revisar cómo lo escribiste?`;
+      }
+
+      // Pronunciación
+      if (/pronunci|como se dice|como se pronuncia/.test(text)) {
+        const cleaned = rawText.replace(/pronunci\w*|como se (dice|pronuncia)|\?/gi, '').trim();
+        const foundTerm = veraFindTerm(cleaned);
+        if (foundTerm) {
+          setTimeout(() => showEntry(glossary.indexOf(foundTerm)), 300);
+          return `<strong>${foundTerm.term_es}</strong> se pronuncia ${foundTerm.fon_es || '—'} (ES), ${foundTerm.fon_en || '—'} (EN), ${foundTerm.fon_fr || '—'} (FR). Te abro su ficha para que uses el botón 🔊.`;
+        }
+        return `Dime qué término quieres escuchar, por ejemplo "¿cómo se pronuncia varianza?"`;
+      }
+
+      // Qué es X / definición directa
+      const queMatch = rawText.match(/qu[eé] es(?:\s+(?:la|el|un|una))?\s+(.+)/i) || rawText.match(/defin[ei]\w*\s+(.+)/i);
+      const candidate = queMatch ? queMatch[1].replace(/\?/g, '').trim() : rawText;
+      const direct = veraFindTerm(candidate);
+      if (direct) {
+        setTimeout(() => showEntry(glossary.indexOf(direct)), 300);
+        return `<strong>${direct.term_es}</strong> (${direct.term_en} · ${direct.term_fr}): ${direct[`def_${currentLang}`] || direct.def_es}`;
+      }
+
+      // Búsqueda difusa como último recurso
+      const matches = veraFindAllMatches(rawText);
+      if (matches.length) {
+        return `No encontré una coincidencia exacta, pero esto podría servirte:` + veraSuggestionRow(matches);
+      }
+
+      return `No encontré nada relacionado con eso en el glosario todavía. Prueba con el nombre de un término estadístico, o escribe <em>ayuda</em> para ver qué puedo hacer.`;
+    }
+
+    function openVera() {
+      veraPanel.classList.add('open');
+      if (!veraMessages.children.length) {
+        veraAddMessage('bot', t('selianGreetPanel'));
+      }
+      veraInput.focus();
+    }
+    function closeVera() {
+      veraPanel.classList.remove('open');
+    }
+
+    veraFab.addEventListener('click', () => {
+      veraPanel.classList.contains('open') ? closeVera() : openVera();
+    });
+    veraClose.addEventListener('click', closeVera);
+
+    veraForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = veraInput.value.trim();
+      if (!val) return;
+      veraAddMessage('user', val);
+      veraInput.value = '';
+      setTimeout(() => {
+        veraAddMessage('bot', veraRespond(val));
+      }, 250);
+    });
+
+    veraMessages.addEventListener('click', (e) => {
+      const chip = e.target.closest('.vera-chip');
+      if (chip) {
+        showEntry(parseInt(chip.dataset.goto));
+        closeVera();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeVera();
+    });
+
+    // ── SELECTOR DE IDIOMA DE LA INTERFAZ ─────────────
+    const langSwitchBtns = document.querySelectorAll('.lang-switch-btn');
+
+    function setLang(lang) {
+      currentLang = lang;
+      try { localStorage.setItem('glosario-ui-lang', lang); } catch (e) {}
+
+      langSwitchBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+      applyI18n();
+      filterTerms();
+
+      if (currentEntryIndex !== null && entryView.style.display !== 'none') {
+        showEntry(currentEntryIndex);
+      }
+      if (statsView.style.display !== 'none') {
+        renderStats();
+      }
+      if (quizOverlay.classList.contains('open') && quizIndex < quizPool.length) {
+        renderQuiz();
+      }
+      if (addOverlay.classList.contains('open')) {
+        renderAddForm();
+      }
+      if (veraPanel.classList.contains('open')) {
+        veraInput.placeholder = t('selianPlaceholder');
+      }
+    }
+
+    langSwitchBtns.forEach(btn => {
+      btn.addEventListener('click', () => setLang(btn.dataset.lang));
+    });
+
+    // ── INICIALIZACIÓN ────────────────────────────────
+    loadStoredTerms();
+    renderTermList();
+    langSwitchBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
+    applyI18n();
   </script>
 </body>
 </html>
